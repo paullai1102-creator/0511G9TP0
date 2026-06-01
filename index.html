@@ -120,11 +120,36 @@
                         <span class="font-black text-2xl tracking-wider text-primary dark:text-blue-400">HIWIN</span>
                     </div>
                     
-                    <!-- Desktop Menu (Hidden on mobile) -->
+                    <!-- Desktop Menu (With Dropdowns for Company and Analysis) -->
                     <div class="hidden lg:flex space-x-6 items-center text-sm font-medium">
                         <button onclick="switchPage('home')" class="nav-link active px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="home" data-i18n="navHome">首頁與團隊</button>
-                        <button onclick="switchPage('company')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="company" data-i18n="navCompany">公司介紹</button>
-                        <button onclick="switchPage('analysis')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="analysis" data-i18n="navAnalysis">市場資源分析</button>
+                        
+                        <!-- Company Profile Dropdown -->
+                        <div class="relative group">
+                            <button onclick="switchPage('company')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition flex items-center gap-1" data-nav="company" data-i18n="navCompany">
+                                <span>公司介紹</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300 group-hover:rotate-180"></i>
+                            </button>
+                            <div class="absolute left-0 mt-0 w-64 rounded-xl bg-white dark:bg-darkCard shadow-premium dark:shadow-premium-dark border border-gray-100 dark:border-gray-850 py-2 hidden group-hover:block z-50 animate-fadeIn">
+                                <button onclick="switchPage('company', 'core-products-section')" class="block w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-blue-400 transition text-xs font-semibold text-gray-700 dark:text-gray-300" data-i18n="navCompanyProd">核心產品組合</button>
+                                <button onclick="switchPage('company', 'history-section')" class="block w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-blue-400 transition text-xs font-semibold text-gray-700 dark:text-gray-300" data-i18n="navCompanyHist">四階段歷史沿革</button>
+                                <button onclick="switchPage('company', 'bmc-section')" class="block w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-blue-400 transition text-xs font-semibold text-gray-700 dark:text-gray-300" data-i18n="navCompanyBMC">商業模式帆布圖 (BMC)</button>
+                                <button onclick="switchPage('company', 'financials-section')" class="block w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-blue-400 transition text-xs font-semibold text-gray-700 dark:text-gray-300" data-i18n="navCompanyFin">財務績效與同業比較</button>
+                            </div>
+                        </div>
+
+                        <!-- Market Analysis Dropdown -->
+                        <div class="relative group">
+                            <button onclick="switchPage('analysis')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition flex items-center gap-1" data-nav="analysis" data-i18n="navAnalysis">
+                                <span>市場資源分析</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300 group-hover:rotate-180"></i>
+                            </button>
+                            <div class="absolute left-0 mt-0 w-64 rounded-xl bg-white dark:bg-darkCard shadow-premium dark:shadow-premium-dark border border-gray-100 dark:border-gray-850 py-2 hidden group-hover:block z-50 animate-fadeIn">
+                                <button onclick="switchPage('analysis', 'pestel-section')" class="block w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-blue-400 transition text-xs font-semibold text-gray-700 dark:text-gray-300" data-i18n="navAnalysisPestel">PESTEL 總體環境分析</button>
+                                <button onclick="switchPage('analysis', 'competitors-section')" class="block w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-blue-400 transition text-xs font-semibold text-gray-700 dark:text-gray-300" data-i18n="navAnalysisComp">競爭者與策略群組分析</button>
+                            </div>
+                        </div>
+
                         <button onclick="switchPage('strategy')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="strategy" data-i18n="navStrategy">成長策略</button>
                         <button onclick="switchPage('quiz')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="quiz" data-i18n="navQuiz">互動問答</button>
                     </div>
@@ -157,8 +182,27 @@
         <div id="mobile-menu" class="hidden lg:hidden bg-white dark:bg-darkCard border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
             <div class="px-4 pt-2 pb-4 space-y-1">
                 <button onclick="switchPage('home'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navHome">首頁與團隊</button>
-                <button onclick="switchPage('company'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navCompany">公司介紹</button>
-                <button onclick="switchPage('analysis'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navAnalysis">市場資源分析</button>
+                
+                <!-- Mobile Company Sections -->
+                <div class="border-b border-gray-100 dark:border-gray-800 pb-2">
+                    <button onclick="switchPage('company'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navCompany">公司介紹</button>
+                    <div class="pl-6 space-y-1">
+                        <button onclick="switchPage('company', 'core-products-section'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary" data-i18n="navCompanyProd">├ 核心產品組合</button>
+                        <button onclick="switchPage('company', 'history-section'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary" data-i18n="navCompanyHist">├ 四階段歷史沿革</button>
+                        <button onclick="switchPage('company', 'bmc-section'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary" data-i18n="navCompanyBMC">├ 商業模式帆布圖 (BMC)</button>
+                        <button onclick="switchPage('company', 'financials-section'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary" data-i18n="navCompanyFin">└ 財務績效與同業比較</button>
+                    </div>
+                </div>
+
+                <!-- Mobile Analysis Sections -->
+                <div class="border-b border-gray-100 dark:border-gray-800 pb-2">
+                    <button onclick="switchPage('analysis'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navAnalysis">市場資源分析</button>
+                    <div class="pl-6 space-y-1">
+                        <button onclick="switchPage('analysis', 'pestel-section'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary" data-i18n="navAnalysisPestel">├ PESTEL 總體環境分析</button>
+                        <button onclick="switchPage('analysis', 'competitors-section'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary" data-i18n="navAnalysisComp">└ 競爭者與策略群組分析</button>
+                    </div>
+                </div>
+
                 <button onclick="switchPage('strategy'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navStrategy">成長策略</button>
                 <button onclick="switchPage('quiz'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navQuiz">互動問答</button>
             </div>
@@ -197,7 +241,7 @@
                     <div class="group bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200/60 dark:border-gray-800 text-center flex flex-col justify-between h-full">
                         <div>
                             <div class="w-16 h-16 bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold mb-3 transition-transform group-hover:scale-110">王</div>
-                            <h3 class="font-extrabold text-gray-950 dark:text-white text-lg" data-i18n="mWangName">王奕翔</h3>
+                            <h3 class="font-extrabold text-gray-955 dark:text-white text-lg" data-i18n="mWangName">王奕翔</h3>
                             <p class="text-[11px] text-primary dark:text-blue-400 font-extrabold mb-3 bg-blue-50 dark:bg-blue-900/30 py-0.5 px-2.5 rounded-full inline-block" data-i18n="mWangDept">教政四</p>
                             <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-4 h-12 flex items-center justify-center" data-i18n="mWangJob">公司簡介、產業鏈分析、104職缺</p>
                         </div>
@@ -305,7 +349,7 @@
             </div>
             
             <!-- Core Products Portfolio -->
-            <div class="mb-12">
+            <div id="core-products-section" class="mb-12">
                 <h3 class="text-2xl font-bold mb-6 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-gears text-primary mr-2.5"></i> <span data-i18n="prodTitle">核心產品組合</span></h3>
                 <div class="grid md:grid-cols-3 gap-6">
                     <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border-t-4 border-blue-500 hover:shadow-lg transition-all duration-300">
@@ -431,7 +475,7 @@
                                 <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
                             </div>
                             <div class="flip-card-back bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
-                                <strong class="text-[11px] uppercase tracking-widest text-indigo-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card5Header">客戶區隔 (Customer Segments)</strong>
+                                <strong class="text-xs uppercase tracking-widest text-indigo-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card5Header">客戶區隔 (Customer Segments)</strong>
                                 <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card5Back">客戶區隔載入中...</p>
                                 <span class="text-[9px] text-indigo-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
                             </div>
@@ -441,7 +485,7 @@
             </div>
 
             <!-- 4-Stage History (Upgraded Beautiful Vertical Timeline) -->
-            <div class="mb-12">
+            <div id="history-section" class="mb-12">
                 <h3 class="text-2xl font-bold mb-8 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-3 text-primary"></i> <span data-i18n="historyTitle">四階段歷史沿革</span></h3>
                 <div class="relative border-l-2 border-primary/30 dark:border-primary/50 ml-6 space-y-10 py-2">
                     
@@ -485,7 +529,7 @@
             </div>
 
             <!-- Business Model Canvas (BMC - Beautiful Grids instead of basic big table for responsive feel) -->
-            <div class="mb-12">
+            <div id="bmc-section" class="mb-12">
                 <h3 class="text-2xl font-bold mb-6 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-table text-primary mr-2.5"></i> <span data-i18n="bmcTitle">商業模式帆布圖 (BMC)</span></h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -599,7 +643,7 @@
             </div>
 
             <!-- Financials (With Interactive SVG Graphics for visual excellence) -->
-            <div class="mb-12">
+            <div id="financials-section" class="mb-12">
                 <h3 class="text-2xl font-bold mb-6 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-chart-line text-primary mr-2.5"></i> <span data-i18n="finTitle">財務績效與同業比較 (2021-2025)</span></h3>
                 <div class="grid lg:grid-cols-2 gap-6">
                     <!-- Left: HIWIN Performance & Custom SVG bar chart -->
@@ -834,7 +878,7 @@
             </div>
 
             <!-- PESTEL Grid Layout Upgraded -->
-            <div class="mb-12">
+            <div id="pestel-section" class="mb-12">
                 <h3 class="text-2xl font-bold mb-6 text-center text-slate-900 dark:text-white" data-i18n="pestelTitle">PESTEL 總體環境分析</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="bg-red-50/70 dark:bg-red-950/20 p-6 rounded-2xl border border-red-100 dark:border-red-900/50 hover:shadow-md transition-shadow">
@@ -850,7 +894,7 @@
                     </div>
 
                     <div class="bg-yellow-50/70 dark:bg-yellow-950/20 p-6 rounded-2xl border border-yellow-100 dark:border-yellow-900/50 hover:shadow-md transition-shadow">
-                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">S</div>
+                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">S</div>
                         <h4 class="font-bold text-yellow-800 dark:text-yellow-300 text-lg mb-2">S (社會 / Social)</h4>
                         <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" data-i18n="pS">少子化與高齡化導致製造業嚴重缺工；社會對企業 ESG 永續要求空前提高。</p>
                     </div>
@@ -868,7 +912,7 @@
                     </div>
 
                     <div class="bg-purple-50/70 dark:bg-purple-950/20 p-6 rounded-2xl border border-purple-100 dark:border-purple-900/50 hover:shadow-md transition-shadow">
-                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">L</div>
+                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">L</div>
                         <h4 class="font-bold text-purple-800 dark:text-purple-300 text-lg mb-2">L (法律 / Legal)</h4>
                         <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" data-i18n="pL">全球專利戰白熱化與智財保護；減碳及減塑法規收緊；勞動人權審查趨嚴。</p>
                     </div>
@@ -976,7 +1020,7 @@
             </div>
 
             <!-- Competitors & Strategy Groups -->
-            <div class="mb-12">
+            <div id="competitors-section" class="mb-12">
                 <h3 class="text-2xl font-bold mb-6 text-center text-slate-900 dark:text-white" data-i18n="compAnalTitle">競爭者與策略群組分析</h3>
                 
                 <div class="bg-white dark:bg-darkCard rounded-2xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-800">
@@ -1036,7 +1080,7 @@
                             <i class="fa-solid fa-arrows-up-to-line"></i>
                         </div>
                         <h4 class="font-extrabold text-lg mb-2 text-slate-950 dark:text-white" data-i18n="vcUp">上遊：原料與加工</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="vcUpDesc">仰賴高品質特殊鋼材與精密熱處理。上銀導入 PDCA 品管與嚴格進料檢驗(IQC)，確保原物料具備微米級加工潛力。</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="vcUpDesc">仰賴高品質特殊鋼材與精密熱處理。上銀導入 PDCA 品管與嚴格進料檢驗(IQC)，確保原物料具備微米級加工潛力。</p>
                     </div>
 
                     <!-- Midstream (Highlighted) -->
@@ -1046,7 +1090,7 @@
                             <i class="fa-solid fa-microchip"></i>
                         </div>
                         <h4 class="font-extrabold text-lg mb-2" data-i18n="vcMid">中遊：零組件與次系統</h4>
-                        <p class="text-sm text-blue-50/95" data-i18n="vcMidDesc">傳動系統與控制系統(大銀微)深度整合。透過在地化 Total Solution (如日本無塵室) 規避關稅壁壘。</p>
+                        <p class="text-sm text-blue-50/95 leading-relaxed" data-i18n="vcMidDesc">傳動系統與控制系統(大銀微)深度整合。透過在地化 Total Solution (如日本無塵室) 規避關稅壁壘。</p>
                     </div>
 
                     <!-- Downstream -->
@@ -1055,7 +1099,7 @@
                             <i class="fa-solid fa-robot"></i>
                         </div>
                         <h4 class="font-extrabold text-lg mb-2 text-slate-950 dark:text-white" data-i18n="vcDown">下游：終端設備應用</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="vcDownDesc">受惠 AMAT/ASML 擴產的半導體設備、高階工具機、AI人形機器人(行星滾柱螺桿)及醫療復健領域。</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="vcDownDesc">受惠 AMAT/ASML 擴產的半導體設備、高階工具機、AI人形機器人(行星滾柱螺桿)及醫療復健領域。</p>
                     </div>
                 </div>
             </div>
@@ -1260,9 +1304,38 @@
                             <a href="https://mops.twse.com.tw/" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-1">https://mops.twse.com.tw/ <i class="fa-solid fa-link text-xs"></i></a>
                         </span>
                     </li>
+                    <!-- New 104 Jobs References -->
                     <li class="flex items-start gap-2.5">
                         <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
-                        <span class="text-slate-700 dark:text-slate-400">課堂 TPO 資料與各組員影片分析報告。</span>
+                        <span>
+                            <strong class="text-slate-800 dark:text-slate-300" data-i18n="refJobTech">104 職缺 - (雲科廠) 技師：</strong> 
+                            <a href="https://www.104.com.tw/job/43l3k?jobsource=m104" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-1"><span data-i18n="linkJob">104 職缺連結</span> <i class="fa-solid fa-link text-xs"></i></a>
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
+                        <span>
+                            <strong class="text-slate-800 dark:text-slate-300" data-i18n="refJobCAE">104 職缺 - 機器人CAE工程師：</strong> 
+                            <a href="https://www.104.com.tw/job/6kq5b?jobsource=m104" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-1"><span data-i18n="linkJob">104 職缺連結</span> <i class="fa-solid fa-link text-xs"></i></a>
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
+                        <span>
+                            <strong class="text-slate-800 dark:text-slate-300" data-i18n="refJobSales">104 職缺 - 西班牙業務外勤：</strong> 
+                            <a href="https://www.104.com.tw/job/860p0?jobsource=m_index_s" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-1"><span data-i18n="linkJob">104 職缺連結</span> <i class="fa-solid fa-link text-xs"></i></a>
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
+                        <span>
+                            <strong class="text-slate-800 dark:text-slate-300" data-i18n="refJobHR">104 職缺 - 人力資源師：</strong> 
+                            <a href="https://www.104.com.tw/job/52h67?jobsource=google" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-1"><span data-i18n="linkJob">104 職缺連結</span> <i class="fa-solid fa-link text-xs"></i></a>
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
+                        <span class="text-slate-700 dark:text-slate-400">課堂 TPO 資料與各組員影片 analysis 報告。</span>
                     </li>
                 </ul>
             </div>
@@ -1286,7 +1359,7 @@
     <!-- Scripts -->
     <script>
         // --- 1. SPA Navigation System ---
-        function switchPage(pageId) {
+        function switchPage(pageId, sectionId) {
             // Hide all pages
             document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
             // Remove active class from nav links
@@ -1309,7 +1382,19 @@
                  document.getElementById('page-references').classList.remove('active');
             }
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Smooth scroll to element if sectionId is provided, else scroll to top
+            if (sectionId) {
+                setTimeout(() => {
+                    const element = document.getElementById(sectionId);
+                    if (element) {
+                        const yOffset = -80; // Offset for sticky navbar
+                        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    }
+                }, 150); // Small delay to let page views swap smoothly
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         // Mobile Menu Toggle logic
@@ -1330,6 +1415,8 @@
         const translations = {
             zh: {
                 navHome: "首頁與團隊", navCompany: "公司介紹", navAnalysis: "市場資源分析", navStrategy: "成長策略", navQuiz: "互動問答",
+                navCompanyProd: "核心產品組合", navCompanyHist: "四階段歷史沿革", navCompanyBMC: "商業模式帆布圖 (BMC)", navCompanyFin: "財務績效與同業比較",
+                navAnalysisPestel: "PESTEL 總體環境分析", navAnalysisComp: "競爭者與策略群組分析",
                 heroTitle: "上銀科技 (HIWIN)", heroSubtitle: "全球傳動控制產品與系統科技產品的專業製造領導巨擘。「與我們共事，您將成為高科技的贏家。」",
                 teamTitle: "團隊成員與分工 (G9)",
                 mWangName: "王奕翔", mWangDept: "教政四", mWangJob: "公司簡介、產業鏈分析、104職缺",
@@ -1386,6 +1473,13 @@
                 refTitle: "引用資料", refHiwin: "上銀科技 (HIWIN) 官方網站：", ref104: "104 人力銀行 (上銀科技職位參考)：", refMOPS: "公開資訊觀測站 (財務報表)：",
                 high: "高", mid: "中", hrSalary: "年薪150W+",
                 
+                // Job Bank specific i18n
+                refJobTech: "104 職缺 - (雲科廠) 技師：",
+                refJobCAE: "104 職缺 - 機器人CAE工程師：",
+                refJobSales: "104 職缺 - 西班牙業務外勤：",
+                refJobHR: "104 職缺 - 人力資源師：",
+                linkJob: "104 職缺連結",
+
                 // --- 19 Flip Cards translations ---
                 titleProdF: "📦 產品與商模核心詞彙翻卡區",
                 titleFinF: "📊 財務與經營效能焦點翻卡",
@@ -1403,7 +1497,7 @@
                 
                 card3Front: "諧波減速機",
                 card3Header: "諧波減速機 (Harmonic Drive)",
-                card3Back: "<b>【定義】</b>一種由柔性齒輪、剛性齒輪及波產生器組成的高精度減速傳動裝置，主要用於需要高扭矩、高減速比及超低背隙（空轉間隙）的場合。<br><br><b>【白話解釋】</b>馬達轉速通常漸快，但力量不夠大。減速機的作用就是「降低轉速、放大力量」。而「諧波」減速機最厲害的地方在於它體積小、重量輕，而且齒輪咬合極度緊密，幾乎沒有一絲空隙（背隙）。這讓機器人關節在停下來的時候，不會產生晃動，是多關節機器人最核心的核心組件。",
+                card3Back: "<b>【定義】</b>一種由柔性齒輪、剛性齒輪及波產生器組成的高精度減速傳動裝置，主要用於需要高扭矩、高減速比及超低背隙（空轉間隙）的場合。<br><br><b>【白話解釋】</b>馬達轉速通常很快，但力量不夠大。減速機的作用就是「降低轉速、放大力量」。而「諧波」減速機最厲害的地方在於它體積小、重量輕，而且齒輪咬合極度緊密，幾乎沒有一絲空隙（背隙）。這讓機器人關節在停下來的時候，不會產生晃動，是多關節機器人最核心的核心組件。",
                 
                 card4Front: "價值主張",
                 card4Header: "價值主張 (Value Proposition)",
@@ -1411,7 +1505,7 @@
                 
                 card5Front: "客戶區隔",
                 card5Header: "客戶區隔 (Customer Segments)",
-                card5Back: "<b>【定義】</b>企業所鎖定、並企圖提供服務與創造價值的一個或多個特定客戶群體或組織。<br><br><b>【白話解釋】</b>這代表企業要將資源集中在「誰」身上。上銀做的是B2B（企業對企業）生意，所以他們的客戶區隔不是一般消費者，而是半導體設備商、工具機廠、AI伺服器製造商等需要精密自動化零件的特定產業廠商。",
+                card5Back: "<b>【定義】</b>企業所鎖定、並企圖提供服務與創造價值的一個或多個特定客戶群體或組織。<br><br><b>【白話解釋】</b>這代表企業要將資源集中在「誰」身上。上銀做的是B2B（企業對企業）生意，所以他們的客戶區隔不是一般消費者，而是半導體設備商、工具機廠、AI 伺服器製造商等需要精密自動化零件的特定產業廠商廠商。",
                 
                 card6Front: "智慧型產品 i4.0GW",
                 card6Header: "智慧型產品 i4.0GW",
@@ -1471,6 +1565,8 @@
             },
             en: {
                 navHome: "Home & Team", navCompany: "Company", navAnalysis: "Market Analysis", navStrategy: "Strategy", navQuiz: "Quiz",
+                navCompanyProd: "Core Product Portfolio", navCompanyHist: "4 Stages of History", navCompanyBMC: "Business Model Canvas (BMC)", navCompanyFin: "Financial Performance & Peers",
+                navAnalysisPestel: "PESTEL Global Analysis", navAnalysisComp: "Competitors & Strategic Groups",
                 heroTitle: "HIWIN Technologies", heroSubtitle: "A global leader in precision motion control and system technology. 'With us, you are a HI-tech WINner.'",
                 teamTitle: "Team Members (G9)",
                 mWangName: "Yi-Xiang Wang", mWangDept: "Ed. Policy & Admin (Senior)", mWangJob: "Company Profile, Value Chain, 104 Job Analysis",
@@ -1527,6 +1623,13 @@
                 refTitle: "References", refHiwin: "HIWIN Official Website: ", ref104: "104 Job Bank (HIWIN): ", refMOPS: "MOPS (Financials): ",
                 high: "High", mid: "Mid", hrSalary: "Annual Salary 1.5M+",
                 
+                // Job Bank specific i18n
+                refJobTech: "104 Job - Technician (Yunlin Plant):",
+                refJobCAE: "104 Job - Robot CAE Engineer:",
+                refJobSales: "104 Job - Spanish Field Sales Representative:",
+                refJobHR: "104 Job - Human Resources Specialist:",
+                linkJob: "104 Job Link",
+
                 // --- 19 Flip Cards translations ---
                 titleProdF: "📦 Core Products & BMC Flashcards",
                 titleFinF: "📊 Financial & Operations Flashcards",
@@ -1701,7 +1804,7 @@
                 { q: "2. 在上銀科技的商業模式畫布中，他們的「客戶區隔」涵蓋了半導體、工具機、醫療設備等多元製造商。為了滿足這群不同產業客戶的核心需求，上銀在「價值主張」上提出了什麼關鍵優勢？", opts: ["(A) 主打消費性電子產品的低成本、大量快速複製模式", "(B) 僅提供標準化規格產品，不接受任何調整", "(C) 憑藉高精度運動控制技術，提供提升生產效率的客製化解決方案"], ans: 2 },
                 { q: "3. 上銀科技能維持全球品牌「HIWIN」的聲譽，並持續推出滾珠螺桿、線性滑軌與工業機器人等高剛性產品，背後最仰賴的「關鍵活動」與「關鍵資源」組合是什麼？", opts: ["(A) 傳動與機器人技術的研發、精密製造控制，以及訓練有素的技術人才", "(B) 大規模的消費型社群媒體廣告投放，以及零售通路門市的經營", "(C) 鋼鐵等原物料的開採、冶煉，以及全球貨運物流車隊的直接管理"], ans: 0 },
                 { q: "4. 針對工業4.0浪潮，上銀研發的智慧型滾珠螺桿(i4.0BS)能為客戶解決什麼樣的傳統維護痛點？", opts: ["(A) 完全取代作業員的手動校準程序", "(B) 將「定期保養」轉化為「預知保養」預測故障避免無預警停機", "(C) 降低原料端特殊鋼材的使用成本"], ans: 1 },
-                { q: "5. 上銀科技在1993年併購德國HOLZER公司，其最主要的戰略目的為何？", opts: ["(A) 擴大低階傳動元件的全球產能", "(B) 為了取得進入中國市場的通行證", "(C) 直接跨越日系大廠所設下的技術壁壘"], ans: 2 },
+                { q: "5. 上銀科技在1993年併購德國HOLZER公司，其最主要的戰略目的 homes？", opts: ["(A) 擴大低階傳動元件的全球產能", "(B) 為了取得進入中國市場的通行證", "(C) 直接跨越日系大廠所設下的技術壁壘"], ans: 2 },
                 { q: "6. 上銀與集團企業「大銀微系統」的戰略同盟，主要如何發揮「集團綜效」來應對全球地緣政治帶來的關稅衝擊？", opts: ["(A) 全面撤回海外投資以回防台灣基地", "(B) 聯合併購海外原物料礦產公司", "(C) 透過「機械傳動+運動控制」提供全方位解決方案(Total Solution)提高整合價值"], ans: 2 },
                 { q: "7. 上銀科技在2023年至2025年間營收與獲利出現下滑，主要是受到以下哪一個外部環境因素的「下行期阻力」影響？", opts: ["(A) 全球通膨與升息壓力，加上中國大陸工具機產業進入漫長的「去庫存」週期", "(B) 美德兩國大幅課徵關稅，導致上銀的海外市場被法律全面封鎖", "(C) 「工業4.0」熱潮完全退去，全球市場不再需要自動化零組件"], ans: 0 },
                 { q: "8. 關於上銀主力產品「線性滑軌」的近十年銷售發展，下列哪一項敘述符合目前的「成熟穩定期(2023-2024)」特徵？", opts: ["(A) 產品供不應求，銷售額比早期瘋狂翻倍成長", "(B) 呈現典型的去庫存與市場飽和，銷售額雖比高峰下滑，但比起2015年仍成長了約78%", "(C) 因為產品過時被市場淘汰，銷售額已經跌破2015年的基準線"], ans: 1 },
