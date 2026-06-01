@@ -4,362 +4,1847 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>上銀科技 HIWIN | 1142 國際策略管理</title>
-    <!-- 引入 Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 FontAwesome 圖示 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1e3a8a', // 科技深藍
-                        accent: '#fbbf24',  // 金色
-                        secondary: '#3b82f6' 
+                        primary: '#0056b3',
+                        primaryHover: '#004085',
+                        darkBg: '#121212',
+                        darkCard: '#1e1e1e',
+                        hiwinGreen: '#008C4A',
+                        hiwinGreenHover: '#006F3A'
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 86, 179, 0.15)',
+                        'premium-dark': '0 10px 30px -10px rgba(0, 0, 0, 0.5)'
                     }
                 }
             }
         }
     </script>
-
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .perspective-1000 { perspective: 1000px; }
-        .transform-style-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
-        .group:hover .group-hover\:rotate-y-180 { transform: rotateY(180deg); }
-        
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        .dark ::-webkit-scrollbar-track { background: #374151; }
-        ::-webkit-scrollbar-thumb { background: #1e3a8a; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-track { background: #2d2d2d; }
+        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #004085; }
         
-        .sidebar-transition { transition: all 0.3s ease-in-out; }
-        
-        /* 播放按鈕動畫 */
-        @keyframes pulse-custom {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        /* Page Transition */
+        .page-view { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .page-view.active { display: block; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(16px); } 
+            to { opacity: 1; transform: translateY(0); } 
         }
-        .animate-pulse-custom { animation: pulse-custom 2s infinite; }
+
+        /* Nav Link Active State */
+        .nav-link.active { 
+            color: #0056b3; 
+            font-weight: 700; 
+            border-bottom: 2px solid #0056b3; 
+        }
+        .dark .nav-link.active { 
+            color: #60A5FA; 
+            border-bottom: 2px solid #60A5FA; 
+        }
+
+        /* Chart Animation */
+        .chart-bar {
+            transform-origin: bottom;
+            animation: growBar 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes growBar {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        /* 3D Flip Cards styling (Corrected) */
+        .flip-container {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        /* Hover flip on desktop */
+        @media (hover: hover) {
+            .flip-container:hover .flip-card-inner {
+                transform: rotateY(180deg);
+            }
+        }
+        /* Tap/Active flip state for touch screens or explicit clicks */
+        .flip-container.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        /* Bulletproof front/back face rendering with hidden backface */
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 1rem;
+        }
+        .flip-card-front {
+            z-index: 2;
+            transform: rotateY(0deg);
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-darkBg dark:text-gray-200 transition-colors duration-300 font-sans flex flex-col min-h-screen">
 
-    <!-- 頂端功能列 (置頂按鈕) -->
-    <header class="fixed top-0 left-0 w-full h-14 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-[60] border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
-        <div class="flex items-center gap-2 md:ml-64 sidebar-transition">
-            <span class="hidden md:inline text-sm font-medium text-gray-500" data-zh="功能控制" data-en="Controls">功能控制</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <!-- 語音導覽 (TTS) -->
-            <button id="btn-audio" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-primary dark:text-blue-400 transition" title="文字轉語音導覽">
-                <i class="fa-solid fa-microphone-lines"></i>
-            </button>
-            <!-- 明暗切換 -->
-            <button id="btn-theme" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-primary dark:text-blue-400 transition" title="切換模式">
-                <i class="fa-solid fa-moon" id="theme-icon"></i>
-            </button>
-            <!-- 語系切換 -->
-            <button id="btn-lang" class="px-3 py-1 bg-primary text-white rounded-md hover:bg-blue-800 transition text-sm font-bold">
-                EN
-            </button>
-            <!-- 手機版選單開關 -->
-            <button id="btn-sidebar-toggle" class="md:hidden p-2 text-primary">
-                <i class="fa-solid fa-bars text-xl"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- 左側導覽列 (Sidebar) -->
-    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-800 border-r border-blue-100 dark:border-gray-700 z-50 transform -translate-x-full md:translate-x-0 sidebar-transition shadow-xl pt-14">
-        <div class="p-6 flex flex-col h-full">
-            <div class="flex items-center gap-3 mb-10 cursor-pointer" onclick="window.scrollTo(0,0)">
-                <i class="fa-solid fa-microchip text-primary text-3xl"></i>
-                <div class="flex flex-col">
-                    <span class="font-bold text-lg text-primary dark:text-blue-400 leading-tight">HIWIN</span>
-                    <span class="text-xs text-gray-500" data-zh="G2 Merida 專案" data-en="G2 Merida Project">G2 Merida 專案</span>
-                </div>
-            </div>
-
-            <nav class="space-y-1">
-                <a href="#company" class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary transition group">
-                    <i class="fa-solid fa-building w-5 text-gray-400 group-hover:text-primary text-center"></i>
-                    <span data-zh="公司介紹" data-en="Company">公司介紹</span>
-                </a>
-                <a href="#analysis" class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary transition group">
-                    <i class="fa-solid fa-chart-pie w-5 text-gray-400 group-hover:text-primary text-center"></i>
-                    <span data-zh="分析與策略" data-en="Strategy">分析與策略</span>
-                </a>
-                <a href="#interactive" class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary transition group">
-                    <i class="fa-solid fa-hand-pointer w-5 text-gray-400 group-hover:text-primary text-center"></i>
-                    <span data-zh="互動專區" data-en="Interactive">互動專區</span>
-                </a>
-                <a href="#team" class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary transition group">
-                    <i class="fa-solid fa-users w-5 text-gray-400 group-hover:text-primary text-center"></i>
-                    <span data-zh="團隊介紹" data-en="Team">團隊介紹</span>
-                </a>
-                <a href="#reference" class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-primary transition group">
-                    <i class="fa-solid fa-book w-5 text-gray-400 group-hover:text-primary text-center"></i>
-                    <span data-zh="引用資料" data-en="References">引用資料</span>
-                </a>
-            </nav>
-        </div>
-    </aside>
-
-    <!-- 主要內容區 -->
-    <div class="md:ml-64 sidebar-transition pt-14">
-        
-        <header class="py-16 bg-gradient-to-br from-gray-900 via-primary to-blue-900 text-white text-center">
-            <div class="max-w-4xl mx-auto px-4">
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-zh="上銀科技：傳動控制領航者" data-en="HIWIN: Motion Control Leader">上銀科技：傳動控制領航者</h1>
-                <div class="w-20 h-1 bg-accent mx-auto mb-6"></div>
-                <p class="text-lg text-gray-200" data-zh="1142 國際策略管理 期末專案" data-en="1142 International Strategic Management">1142 國際策略管理 期末專案</p>
-            </div>
-        </header>
-
-        <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
-
-            <!-- 公司介紹 + 語音介紹 -->
-            <section id="company" class="scroll-mt-24">
-                <div class="flex flex-col items-center mb-10">
-                    <h2 class="text-3xl font-bold text-primary dark:text-blue-400 mb-4" data-zh="公司介紹" data-en="Company Overview">公司介紹</h2>
+    <!-- Navigation Bar -->
+    <nav class="fixed w-full z-50 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md shadow-md transition-colors duration-300 border-b border-gray-100 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Left side: Logo & Menu -->
+                <div class="flex items-center space-x-6">
+                    <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="switchPage('home')">
+                        <i class="fa-solid fa-microchip text-primary dark:text-blue-400 text-2xl mr-2 animate-pulse"></i>
+                        <span class="font-black text-2xl tracking-wider text-primary dark:text-blue-400">HIWIN</span>
+                    </div>
                     
-                    <!-- 錄音播放器區塊 -->
-                    <div class="flex items-center gap-4 bg-white dark:bg-gray-800 px-6 py-3 rounded-full shadow-lg border border-accent/30">
-                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300" data-zh="點擊聽取動機與介紹" data-en="Listen to Introduction">點擊聽取動機與介紹</span>
-                        <button id="btn-play-audio-file" class="w-12 h-12 flex items-center justify-center bg-accent text-gray-900 rounded-full hover:scale-110 active:scale-95 transition-all shadow-md animate-pulse-custom">
-                            <i class="fa-solid fa-play ml-1" id="play-icon"></i>
-                        </button>
-                        <!-- 隱藏的音源標籤 -->
-                        <audio id="audio-file" src="https://docs.google.com/uc?export=download&id=1e1edm9bJfzKJmDPMY19wpM7AXKoLs8kJ"></audio>
+                    <!-- Desktop Menu (Hidden on mobile) -->
+                    <div class="hidden lg:flex space-x-6 items-center text-sm font-medium">
+                        <button onclick="switchPage('home')" class="nav-link active px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="home" data-i18n="navHome">首頁與團隊</button>
+                        <button onclick="switchPage('company')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="company" data-i18n="navCompany">公司介紹</button>
+                        <button onclick="switchPage('analysis')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="analysis" data-i18n="navAnalysis">市場資源分析</button>
+                        <button onclick="switchPage('strategy')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="strategy" data-i18n="navStrategy">成長策略</button>
+                        <button onclick="switchPage('quiz')" class="nav-link px-1 py-5 hover:text-primary dark:hover:text-blue-400 transition" data-nav="quiz" data-i18n="navQuiz">互動問答</button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-primary">
-                        <h3 class="font-bold text-lg mb-3 text-primary dark:text-blue-300" data-zh="歷史沿革" data-en="History">歷史沿革</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed" data-zh="創立於1989年，上銀科技以「HIWIN」品牌行銷全球。專注於傳動控制與系統科技，為台灣最大的機械零組件廠。" data-en="Founded in 1989, HIWIN is a global leader in motion control and system technology, the largest in Taiwan.">創立於1989年，上銀科技以「HIWIN」品牌行銷全球。專注於傳動控制與系統科技，為台灣最大的機械零組件廠。</p>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-primary">
-                        <h3 class="font-bold text-lg mb-3 text-primary dark:text-blue-300" data-zh="組織架構" data-en="Organization">組織架構</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed" data-zh="涵蓋滾珠螺桿、線性滑軌與機器人事業部。功能層級具備強大研發與全球行銷網絡。" data-en="Includes Ballscrews, Linear Guideways, and Robots. Features strong R&D and global marketing networks.">涵蓋滾珠螺桿、線性滑軌與機器人事業部。功能層級具備強大研發與全球行銷網絡。</p>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-primary">
-                        <h3 class="font-bold text-lg mb-3 text-primary dark:text-blue-300" data-zh="財務資訊" data-en="Financials">財務資訊</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed" data-zh="受惠於自動化趨勢，營收穩健。研發支出占比高，體現對技術創新的重視。" data-en="Revenue is stable due to automation trends. High R&D spending shows commitment to innovation.">受惠於自動化趨勢，營收穩健。研發支出占比高，體現對技術創新的重視。</p>
-                    </div>
-                </div>
-            </section>
+                <!-- Right side: Controls -->
+                <div class="flex items-center space-x-2">
+                    <!-- Speech Guide -->
+                    <button onclick="speakCurrentPage()" class="p-2.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/40 text-primary dark:text-blue-400 transition" title="語音導覽" id="speakBtn">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition" title="切換明暗模式">
+                        <i id="themeIcon" class="fa-solid fa-moon"></i>
+                    </button>
+                    <!-- Language Toggle -->
+                    <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 dark:hover:bg-gray-700 transition font-bold text-xs" title="Toggle Language">
+                        <span id="langText">EN</span>
+                    </button>
 
-            <!-- 分析策略 (翻轉卡) -->
-            <section id="analysis" class="scroll-mt-24">
-                <h2 class="text-3xl font-bold text-center mb-10 text-primary dark:text-blue-400" data-zh="分析與策略" data-en="Strategy">分析與策略</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 perspective-1000">
-                    <div class="group h-60 cursor-pointer">
-                        <div class="relative h-full transform-style-3d transition-transform duration-700 group-hover:rotate-y-180">
-                            <div class="absolute inset-0 backface-hidden bg-white dark:bg-gray-700 rounded-xl shadow flex flex-col items-center justify-center p-4 border border-gray-100 dark:border-gray-600">
-                                <i class="fa-solid fa-magnifying-glass text-3xl text-primary mb-3"></i>
-                                <span class="font-bold" data-zh="市場分析" data-en="Market Analysis">市場分析</span>
-                            </div>
-                            <div class="absolute inset-0 backface-hidden rotate-y-180 bg-primary text-white rounded-xl p-6 flex items-center text-center text-sm">
-                                <p data-zh="全球自動化浪潮帶動需求，競爭對手為日本THK等。上銀需藉由品牌與性價比優勢競爭。" data-en="Global automation drives demand. Competition includes THK. HIWIN competes with brand and price-performance.">全球自動化浪潮帶動需求，競爭對手為日本THK等。上銀需藉由品牌與性價比優勢競爭。</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="group h-60 cursor-pointer">
-                        <div class="relative h-full transform-style-3d transition-transform duration-700 group-hover:rotate-y-180">
-                            <div class="absolute inset-0 backface-hidden bg-white dark:bg-gray-700 rounded-xl shadow flex flex-col items-center justify-center p-4 border border-gray-100 dark:border-gray-600">
-                                <i class="fa-solid fa-gem text-3xl text-primary mb-3"></i>
-                                <span class="font-bold" data-zh="資源評價" data-en="VRIO">資源評價</span>
-                            </div>
-                            <div class="absolute inset-0 backface-hidden rotate-y-180 bg-primary text-white rounded-xl p-6 flex items-center text-center text-sm">
-                                <p data-zh="擁有豐沛專利、機電整合能力與全球通路，具有高價值與難以模仿的優勢。" data-en="Has patents, integration skills, and global channels, offering high value and hard-to-imitate advantages.">擁有豐沛專利、機電整合能力與全球通路，具有高價值與難以模仿的優勢。</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="group h-60 cursor-pointer">
-                        <div class="relative h-full transform-style-3d transition-transform duration-700 group-hover:rotate-y-180">
-                            <div class="absolute inset-0 backface-hidden bg-white dark:bg-gray-700 rounded-xl shadow flex flex-col items-center justify-center p-4 border border-gray-100 dark:border-gray-600">
-                                <i class="fa-solid fa-arrow-trend-up text-3xl text-primary mb-3"></i>
-                                <span class="font-bold" data-zh="成長策略" data-en="Growth Strategy">成長策略</span>
-                            </div>
-                            <div class="absolute inset-0 backface-hidden rotate-y-180 bg-primary text-white rounded-xl p-6 flex items-center text-center text-sm">
-                                <p data-zh="開發智慧零組件、擴大工業機器人應用，並強化全球服務網絡。" data-en="Developing smart components, expanding robot usage, and strengthening global networks.">開發智慧零組件、擴大工業機器人應用，並強化全球服務網絡。</p>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Mobile Menu Button (Hamburger) -->
+                    <button onclick="toggleMobileMenu()" class="lg:hidden p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition" id="mobile-menu-btn">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
                 </div>
-            </section>
-
-            <!-- 團隊介紹與反思 -->
-            <section id="team" class="scroll-mt-24">
-                <h2 class="text-3xl font-bold text-center mb-10 text-primary dark:text-blue-400" data-zh="團隊介紹與反思" data-en="Team & Reflection">團隊介紹與反思</h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- 成員名單 -->
-                    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md border-l-8 border-primary">
-                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                            <i class="fa-solid fa-user-group text-primary"></i>
-                            <span data-zh="小組成員" data-en="Members">小組成員</span>
-                        </h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
-                                <p class="text-xs text-gray-500 mb-1">教政三</p>
-                                <p class="font-bold text-primary dark:text-blue-300">王奕翔</p>
-                            </div>
-                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
-                                <p class="text-xs text-gray-500 mb-1">管學三</p>
-                                <p class="font-bold text-primary dark:text-blue-300">林振宸</p>
-                            </div>
-                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
-                                <p class="text-xs text-gray-500 mb-1">管學三</p>
-                                <p class="font-bold text-primary dark:text-blue-300">廖翊辰</p>
-                            </div>
-                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
-                                <p class="text-xs text-gray-500 mb-1">國企三</p>
-                                <p class="font-bold text-primary dark:text-blue-300">賴瑞逢</p>
-                            </div>
-                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
-                                <p class="text-xs text-gray-500 mb-1">管學三</p>
-                                <p class="font-bold text-primary dark:text-blue-300">楊勛仲</p>
-                            </div>
-                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
-                                <p class="text-xs text-gray-500 mb-1">管學三</p>
-                                <p class="font-bold text-primary dark:text-blue-300">吳易儒</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 反思內容 -->
-                    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md space-y-6">
-                        <h3 class="text-xl font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-lightbulb text-accent"></i>
-                            <span data-zh="製作心得" data-en="Reflection">製作心得</span>
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 leading-relaxed" data-zh="我們透過線上會議深入探討上銀科技的策略核心，每位成員皆參與了資料分析與網頁內容校對。本次專案讓我們學習到如何將複雜的企業策略轉化為直觀的互動網頁，並體現了跨學系團隊合作的價值。" data-en="We discussed HIWIN's core strategy via online meetings. Every member contributed to data analysis and proofreading. This project taught us how to transform complex strategies into intuitive interactive web pages.">我們透過線上會議深入探討上銀科技的策略核心，每位成員皆參與了資料分析與網頁內容校對。本次專案讓我們學習到如何將複雜的企業策略轉化為直觀的互動網頁，並體現了跨學系團隊合作的價值。</p>
-                        <div class="flex flex-wrap gap-2 text-xs">
-                            <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full"># 團隊合作</span>
-                            <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 rounded-full"># AI 輔助翻譯</span>
-                            <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full"># 策略管理實務</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 引用資料 -->
-            <section id="reference" class="scroll-mt-24">
-                <h2 class="text-2xl font-bold mb-6 text-primary dark:text-blue-400" data-zh="引用資料" data-en="References">引用資料</h2>
-                <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-xl border-l-4 border-accent space-y-3">
-                    <div class="flex flex-col">
-                        <span class="font-bold text-sm text-gray-700 dark:text-gray-200" data-zh="參考網頁與技術規範" data-en="Ref Webpage">參考網頁與技術規範</span>
-                        <a href="https://jeremywang0121.github.io/CDPS_First-Place-in-114_webpage-competition/" target="_blank" class="text-blue-600 text-sm hover:underline break-all">https://jeremywang0121.github.io/CDPS_First-Place-in-114_webpage-competition/</a>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="font-bold text-sm text-gray-700 dark:text-gray-200" data-zh="上銀科技官網" data-en="HIWIN Website">上銀科技官網</span>
-                        <a href="https://www.hiwin.tw/" target="_blank" class="text-blue-600 text-sm hover:underline break-all">https://www.hiwin.tw/</a>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-
-        <!-- 頁尾 (顯示課程與老師資訊) -->
-        <footer class="bg-gray-900 text-gray-300 py-12 text-center border-t-4 border-accent">
-            <div class="max-w-4xl mx-auto px-4 space-y-4">
-                <div class="space-y-1">
-                    <p class="text-xl md:text-2xl font-bold text-white tracking-wide" data-zh="1142 國際策略管理" data-en="1142 International Strategic Management">1142 國際策略管理</p>
-                    <p class="text-md text-accent font-medium">期末互動式學習網頁競賽</p>
-                </div>
-                <div class="w-16 h-px bg-gray-700 mx-auto my-4"></div>
-                <div class="text-lg">
-                    <p><span class="text-gray-500 mr-2" data-zh="授課教師:" data-en="Instructor:">授課教師:</span> <span class="text-white font-bold">梅筱珍</span></p>
-                    <p class="mt-2"><span class="text-gray-500 mr-2" data-zh="專案組別:" data-en="Group:">專案組別:</span> <span class="text-white">G2 Merida - 上銀科技</span></p>
-                </div>
-                <p class="pt-8 text-[11px] text-gray-500 tracking-wider">
-                    © 2026 國際策略管理 G2 Merida. All rights reserved.
-                </p>
             </div>
-        </footer>
-    </div>
+        </div>
 
-    <!-- 腳本 -->
-    <script>
-        // 側邊欄開關
-        const sidebar = document.getElementById('sidebar');
-        document.getElementById('btn-sidebar-toggle').addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-        });
-        document.querySelectorAll('#sidebar nav a').forEach(link => {
-            link.addEventListener('click', () => { if (window.innerWidth < 768) sidebar.classList.add('-translate-x-full'); });
-        });
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white dark:bg-darkCard border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
+            <div class="px-4 pt-2 pb-4 space-y-1">
+                <button onclick="switchPage('home'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navHome">首頁與團隊</button>
+                <button onclick="switchPage('company'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navCompany">公司介紹</button>
+                <button onclick="switchPage('analysis'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navAnalysis">市場資源分析</button>
+                <button onclick="switchPage('strategy'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navStrategy">成長策略</button>
+                <button onclick="switchPage('quiz'); toggleMobileMenu();" class="block w-full text-left px-4 py-3 rounded-lg text-base font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-primary" data-i18n="navQuiz">互動問答</button>
+            </div>
+        </div>
+    </nav>
 
-        // 明暗模式
-        const btnTheme = document.getElementById('btn-theme');
-        btnTheme.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-        });
+    <!-- Main Content Area -->
+    <main class="flex-grow pt-24 pb-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
 
-        // 雙語切換
-        let currentLang = 'zh';
-        const btnLang = document.getElementById('btn-lang');
-        btnLang.addEventListener('click', () => {
-            currentLang = currentLang === 'zh' ? 'en' : 'zh';
-            document.querySelectorAll('[data-zh]').forEach(el => {
-                const text = el.getAttribute(`data-${currentLang}`);
-                if (text) el.innerText = text;
-            });
-            btnLang.innerText = currentLang === 'zh' ? 'EN' : '中';
-        });
+        <!-- ================= PAGE: HOME & TEAM ================= -->
+        <section id="page-home" class="page-view active">
+            <!-- Hero -->
+            <div class="relative overflow-hidden text-center py-16 px-6 mb-12 bg-gradient-to-br from-blue-50 via-white to-green-50/30 dark:from-gray-900 dark:via-darkBg dark:to-green-950/20 rounded-3xl shadow-premium dark:shadow-premium-dark border border-blue-100/50 dark:border-gray-800">
+                <!-- Background decorative elements -->
+                <div class="absolute -top-12 -left-12 w-48 h-48 bg-primary/5 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-hiwinGreen/5 rounded-full blur-2xl"></div>
 
-        // --- 錄音播放功能 ---
-        const audioFile = document.getElementById('audio-file');
-        const btnPlayAudio = document.getElementById('btn-play-audio-file');
-        const playIcon = document.getElementById('play-icon');
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 text-gray-900 dark:text-white tracking-tight" data-i18n="heroTitle">上銀科技 (HIWIN)</h1>
+                <div class="inline-flex items-center space-x-2 px-4 py-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-full mb-6">
+                    <span class="text-sm font-bold text-primary dark:text-blue-400">HI-tech WINner</span>
+                </div>
+                <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed" data-i18n="heroSubtitle">全球傳動控制產品與系統科技產品的專業製造領導巨擘。「與我們共事，您將成為高科技的贏家。」</p>
+            </div>
 
-        btnPlayAudio.addEventListener('click', () => {
-            if (audioFile.paused) {
-                // 如果 TTS 正在播放，先關掉
-                if (isPlaying) { window.speechSynthesis.cancel(); isPlaying = false; btnAudio.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>'; }
+            <!-- Team Section -->
+            <div class="mb-12">
+                <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
+                    <h2 class="text-3xl font-extrabold flex items-center gap-3 text-slate-900 dark:text-white">
+                        <span class="w-2.5 h-8 bg-primary rounded-full block"></span>
+                        <span data-i18n="teamTitle">團隊成員與分工 (G9)</span>
+                    </h2>
+                </div>
                 
-                audioFile.play();
-                playIcon.className = 'fa-solid fa-pause';
-                btnPlayAudio.classList.remove('animate-pulse-custom');
-            } else {
-                audioFile.pause();
-                playIcon.className = 'fa-solid fa-play ml-1';
-                btnPlayAudio.classList.add('animate-pulse-custom');
-            }
-        });
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
+                    <!-- Member 1: 王奕翔 -->
+                    <div class="group bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200/60 dark:border-gray-800 text-center flex flex-col justify-between h-full">
+                        <div>
+                            <div class="w-16 h-16 bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold mb-3 transition-transform group-hover:scale-110">王</div>
+                            <h3 class="font-extrabold text-gray-950 dark:text-white text-lg" data-i18n="mWangName">王奕翔</h3>
+                            <p class="text-[11px] text-primary dark:text-blue-400 font-extrabold mb-3 bg-blue-50 dark:bg-blue-900/30 py-0.5 px-2.5 rounded-full inline-block" data-i18n="mWangDept">教政四</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-4 h-12 flex items-center justify-center" data-i18n="mWangJob">公司簡介、產業鏈分析、104職缺</p>
+                        </div>
+                        <a href="https://youtu.be/9wdy4obckgo" target="_blank" class="inline-flex items-center justify-center gap-1.5 text-red-500 hover:text-red-600 font-bold text-xs transition duration-200 mt-auto border-t border-gray-100 dark:border-gray-800/60 pt-3">
+                            <i class="fa-brands fa-youtube text-lg"></i>
+                            <span data-i18n="btnPresentation">簡報影片</span>
+                        </a>
+                    </div>
 
-        audioFile.onended = () => {
-            playIcon.className = 'fa-solid fa-play ml-1';
-            btnPlayAudio.classList.add('animate-pulse-custom');
+                    <!-- Member 2: 廖翊辰 -->
+                    <div class="group bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200/60 dark:border-gray-800 text-center flex flex-col justify-between h-full">
+                        <div>
+                            <div class="w-16 h-16 bg-green-100 dark:bg-green-950 text-green-600 dark:text-green-400 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold mb-3 transition-transform group-hover:scale-110">廖</div>
+                            <h3 class="font-extrabold text-gray-955 dark:text-white text-lg" data-i18n="mLiaoName">廖翊辰</h3>
+                            <p class="text-[11px] text-green-600 dark:text-green-400 font-extrabold mb-3 bg-green-50 dark:bg-green-900/30 py-0.5 px-2.5 rounded-full inline-block" data-i18n="mLiaoDept">管學三</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-4 h-12 flex items-center justify-center" data-i18n="mLiaoJob">產品組合、商業模式帆布圖</p>
+                        </div>
+                        <a href="https://youtu.be/nbY_Mbx7XAY" target="_blank" class="inline-flex items-center justify-center gap-1.5 text-red-500 hover:text-red-600 font-bold text-xs transition duration-200 mt-auto border-t border-gray-100 dark:border-gray-800/60 pt-3">
+                            <i class="fa-brands fa-youtube text-lg"></i>
+                            <span data-i18n="btnPresentation">簡報影片</span>
+                        </a>
+                    </div>
+
+                    <!-- Member 3: 林振宸 -->
+                    <div class="group bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200/60 dark:border-gray-800 text-center flex flex-col justify-between h-full">
+                        <div>
+                            <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-950/55 text-yellow-600 dark:text-yellow-400 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold mb-3 transition-transform group-hover:scale-110">林</div>
+                            <h3 class="font-extrabold text-gray-955 dark:text-white text-lg" data-i18n="mLinName">林振宸</h3>
+                            <p class="text-[11px] text-yellow-600 dark:text-yellow-400 font-extrabold mb-3 bg-yellow-50 dark:bg-yellow-900/30 py-0.5 px-2.5 rounded-full inline-block" data-i18n="mLinDept">管學三</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-4 h-12 flex items-center justify-center" data-i18n="mLinJob">上銀財報分析及績效整理</p>
+                        </div>
+                        <a href="https://youtu.be/qvaPI7BFPSc" target="_blank" class="inline-flex items-center justify-center gap-1.5 text-red-500 hover:text-red-600 font-bold text-xs transition duration-200 mt-auto border-t border-gray-100 dark:border-gray-800/60 pt-3">
+                            <i class="fa-brands fa-youtube text-lg"></i>
+                            <span data-i18n="btnPresentation">簡報影片</span>
+                        </a>
+                    </div>
+
+                    <!-- Member 4: 楊勛仲 -->
+                    <div class="group bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200/60 dark:border-gray-800 text-center flex flex-col justify-between h-full">
+                        <div>
+                            <div class="w-16 h-16 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold mb-3 transition-transform group-hover:scale-110">楊</div>
+                            <h3 class="font-extrabold text-gray-955 dark:text-white text-lg" data-i18n="mYangName">楊勛仲</h3>
+                            <p class="text-[11px] text-purple-600 dark:text-purple-400 font-extrabold mb-3 bg-purple-50 dark:bg-purple-900/30 py-0.5 px-2.5 rounded-full inline-block" data-i18n="mYangDept">管學三</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-4 h-12 flex items-center justify-center" data-i18n="mYangJob">成員及網頁進度管理</p>
+                        </div>
+                        <a href="https://youtu.be/S3sIC8GJKpk" target="_blank" class="inline-flex items-center justify-center gap-1.5 text-red-500 hover:text-red-600 font-bold text-xs transition duration-200 mt-auto border-t border-gray-100 dark:border-gray-800/60 pt-3">
+                            <i class="fa-brands fa-youtube text-lg"></i>
+                            <span data-i18n="btnPresentation">簡報影片</span>
+                        </a>
+                    </div>
+
+                    <!-- Member 5: 吳易儒 -->
+                    <div class="group bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200/60 dark:border-gray-800 text-center flex flex-col justify-between h-full">
+                        <div>
+                            <div class="w-16 h-16 bg-pink-100 dark:bg-pink-950 text-pink-600 dark:text-pink-400 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold mb-3 transition-transform group-hover:scale-110">吳</div>
+                            <h3 class="font-extrabold text-gray-955 dark:text-white text-lg" data-i18n="mWuName">吳易儒</h3>
+                            <p class="text-[11px] text-pink-600 dark:text-pink-400 font-extrabold mb-3 bg-pink-50 dark:bg-pink-900/30 py-0.5 px-2.5 rounded-full inline-block" data-i18n="mWuDept">管學三</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-4 h-12 flex items-center justify-center" data-i18n="mWuJob">PESTEL分析、資料統整</p>
+                        </div>
+                        <a href="https://youtu.be/ievwfoL9DQU" target="_blank" class="inline-flex items-center justify-center gap-1.5 text-red-500 hover:text-red-600 font-bold text-xs transition duration-200 mt-auto border-t border-gray-100 dark:border-gray-800/60 pt-3">
+                            <i class="fa-brands fa-youtube text-lg"></i>
+                            <span data-i18n="btnPresentation">簡報影片</span>
+                        </a>
+                    </div>
+
+                    <!-- Member 6: 賴瑞逢 -->
+                    <div class="group bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200/60 dark:border-gray-800 text-center flex flex-col justify-between h-full">
+                        <div>
+                            <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-full mx-auto flex items-center justify-center text-2xl font-extrabold mb-3 transition-transform group-hover:scale-110">賴</div>
+                            <h3 class="font-extrabold text-gray-955 dark:text-white text-lg" data-i18n="mLaiName">賴瑞逢</h3>
+                            <p class="text-[11px] text-indigo-600 dark:text-indigo-400 font-extrabold mb-3 bg-indigo-50 dark:bg-indigo-900/30 py-0.5 px-2.5 rounded-full inline-block" data-i18n="mLaiDept">國企三</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-4 h-12 flex items-center justify-center" data-i18n="mLaiJob">網頁統整、競爭對手分析</p>
+                        </div>
+                        <a href="https://youtube.com/shorts/ia8oMsDHLsk" target="_blank" class="inline-flex items-center justify-center gap-1.5 text-red-500 hover:text-red-600 font-bold text-xs transition duration-200 mt-auto border-t border-gray-100 dark:border-gray-800/60 pt-3">
+                            <i class="fa-brands fa-youtube text-lg"></i>
+                            <span data-i18n="btnPresentation">簡報影片</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Disclosure Banner -->
+            <div class="bg-blue-50/50 dark:bg-blue-950/20 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/40 relative overflow-hidden">
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-xl text-primary dark:text-blue-300">
+                        <i class="fa-solid fa-robot text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-1" data-i18n="aiTitle">AI 工具使用聲明</h4>
+                        <p class="text-gray-600 dark:text-gray-300 leading-relaxed text-sm md:text-base" data-i18n="aiDesc">
+                            本專案使用 Gemini 協助網頁程式碼結構生成與 Tailwind CSS 排版（SPA單頁應用框架、雙語切換邏輯）；文本內容翻譯則輔以翻譯工具進行潤飾。所有策略分析內容皆為團隊成員基於課堂理論自行統整與產出。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE: COMPANY ================= -->
+        <section id="page-company" class="page-view">
+            <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
+                <h2 class="text-3xl font-extrabold flex items-center gap-3 text-slate-900 dark:text-white">
+                    <span class="w-2.5 h-8 bg-primary rounded-full block"></span>
+                    <span data-i18n="compTitle">公司介紹與發展</span>
+                </h2>
+            </div>
+            
+            <!-- Core Products Portfolio -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-gears text-primary mr-2.5"></i> <span data-i18n="prodTitle">核心產品組合</span></h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border-t-4 border-blue-500 hover:shadow-lg transition-all duration-300">
+                        <div class="text-blue-500 text-2xl mb-4"><i class="fa-solid fa-circle-dot"></i></div>
+                        <h4 class="font-bold text-lg mb-2" data-i18n="prod1">一、精密傳動元件</h4>
+                        <ul class="space-y-3.5 text-sm text-gray-600 dark:text-gray-400">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-blue-500 mt-1"></i> <span data-i18n="prod1_1">滾珠螺桿：旋轉轉線性，高精度定位。</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-blue-500 mt-1"></i> <span data-i18n="prod1_2">線性滑軌：高剛性、高負載線性平台。</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-blue-500 mt-1"></i> <span data-i18n="prod1_3">交叉滾柱軸承：高精度旋轉運動。</span></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border-t-4 border-green-500 hover:shadow-lg transition-all duration-300">
+                        <div class="text-green-500 text-2xl mb-4"><i class="fa-solid fa-robot"></i></div>
+                        <h4 class="font-bold text-lg mb-2" data-i18n="prod2">二、機器人與自動化</h4>
+                        <ul class="space-y-3.5 text-sm text-gray-600 dark:text-gray-400">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-green-500 mt-1"></i> <span data-i18n="prod2_1">工業機器人 (多關節, SCARA)。</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-green-500 mt-1"></i> <span data-i18n="prod2_2">諧波減速機：機器人關節核心。</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-green-500 mt-1"></i> <span data-i18n="prod2_3">單軸模組及次系統整合。</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-xl shadow-sm border-t-4 border-purple-500 hover:shadow-lg transition-all duration-300">
+                        <div class="text-purple-500 text-2xl mb-4"><i class="fa-solid fa-server"></i></div>
+                        <h4 class="font-bold text-lg mb-2" data-i18n="prod3">三、新興應用領域</h4>
+                        <ul class="space-y-3.5 text-sm text-gray-600 dark:text-gray-400">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-purple-500 mt-1"></i> <span data-i18n="prod3_1">AI伺服器：散熱模組與傳動元件。</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-purple-500 mt-1"></i> <span data-i18n="prod3_2">半導體：晶圓移載模組(EFEM)。</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-caret-right text-purple-500 mt-1"></i> <span data-i18n="prod3_3">醫療產業：下肢復健機器人。</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Page Flip Cards (Cards 1-5: Products & BMC Front terminology) -->
+            <div class="mb-12 bg-slate-100/50 dark:bg-slate-900/30 p-6 rounded-3xl border border-gray-200/50 dark:border-gray-800">
+                <div class="text-center mb-6">
+                    <h4 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="titleProdF">📦 產品與商模核心詞彙翻卡區</h4>
+                    <p class="text-xs text-slate-500 mt-1" data-i18n="clickToFlip">（點擊卡片翻面閱讀戰略解析）</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Card 1 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Product • 01</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-arrows-left-right text-blue-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card1Front">滾珠螺桿</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-blue-600 to-primary text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-[11px] uppercase tracking-widest text-blue-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card1Header">滾珠螺桿 (Ball Screw)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" id="card1Back" data-i18n="card1Back">滾珠螺桿載入中...</p>
+                                <span class="text-[9px] text-blue-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Product • 02</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-train text-teal-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card2Front">線性滑軌</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-teal-600 to-teal-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-[11px] uppercase tracking-widest text-teal-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card2Header">線性滑軌 (Linear Guideway)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card2Back">線性滑軌載入中...</p>
+                                <span class="text-[9px] text-teal-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-purple-500 uppercase tracking-widest">Product • 03</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-compact-disc text-purple-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card3Front">諧波減速機</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-[11px] uppercase tracking-widest text-purple-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card3Header">諧波減速機 (Harmonic Drive)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card3Back">諧波減速機載入中...</p>
+                                <span class="text-[9px] text-purple-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 4 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest">BMC • 04</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-gift text-red-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card4Front">價值主張</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-red-600 to-red-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-[11px] uppercase tracking-widest text-red-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card4Header">價值主張 (Value Proposition)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card4Back">價值主張載入中...</p>
+                                <span class="text-[9px] text-red-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 5 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">BMC • 05</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-users-viewfinder text-indigo-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card5Front">客戶區隔</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-[11px] uppercase tracking-widest text-indigo-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card5Header">客戶區隔 (Customer Segments)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card5Back">客戶區隔載入中...</p>
+                                <span class="text-[9px] text-indigo-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4-Stage History (Upgraded Beautiful Vertical Timeline) -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-8 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-clock-rotate-left mr-3 text-primary"></i> <span data-i18n="historyTitle">四階段歷史沿革</span></h3>
+                <div class="relative border-l-2 border-primary/30 dark:border-primary/50 ml-6 space-y-10 py-2">
+                    
+                    <div class="relative pl-8 group">
+                        <div class="absolute -left-[11px] top-1.5 w-5 h-5 bg-white dark:bg-darkBg border-4 border-primary rounded-full group-hover:bg-primary transition-colors duration-300"></div>
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all">
+                            <span class="text-xs font-bold text-primary bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full">1989 - 2000</span>
+                            <h4 class="font-bold text-lg mt-2 text-slate-900 dark:text-white" data-i18n="histPhase1">奠基與早期國際化</h4>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mt-2 leading-relaxed" data-i18n="histDesc1">創立並積極海外佈局。1993年併購德國HOLZER公司，直接跨越日系技術壁壘。</p>
+                        </div>
+                    </div>
+
+                    <div class="relative pl-8 group">
+                        <div class="absolute -left-[11px] top-1.5 w-5 h-5 bg-white dark:bg-darkBg border-4 border-primary rounded-full group-hover:bg-primary transition-colors duration-300"></div>
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all">
+                            <span class="text-xs font-bold text-primary bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full">2001 - 2010</span>
+                            <h4 class="font-bold text-lg mt-2 text-slate-900 dark:text-white" data-i18n="histPhase2">產能擴張與研發深化</h4>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mt-2 leading-relaxed" data-i18n="histDesc2">2009年掛牌上市。策略投資以色列控制器廠MegaFabs，邁向機電系統供應商。</p>
+                        </div>
+                    </div>
+
+                    <div class="relative pl-8 group">
+                        <div class="absolute -left-[11px] top-1.5 w-5 h-5 bg-white dark:bg-darkBg border-4 border-primary rounded-full group-hover:bg-primary transition-colors duration-300"></div>
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all">
+                            <span class="text-xs font-bold text-primary bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full">2011 - 2020</span>
+                            <h4 class="font-bold text-lg mt-2 text-slate-900 dark:text-white" data-i18n="histPhase3">智慧製造與醫療跨界</h4>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mt-2 leading-relaxed" data-i18n="histDesc3">研發智慧型滾珠螺桿(i4.0BS)，打入醫療(ISO 13485)與半導體高階供應鏈。</p>
+                        </div>
+                    </div>
+
+                    <div class="relative pl-8 group">
+                        <div class="absolute -left-[11px] top-1.5 w-5 h-5 bg-white dark:bg-darkBg border-4 border-primary rounded-full group-hover:bg-primary transition-colors duration-300"></div>
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all">
+                            <span class="text-xs font-bold text-primary bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full">2021 - 迄今</span>
+                            <h4 class="font-bold text-lg mt-2 text-slate-900 dark:text-white" data-i18n="histPhase4">ESG領導與前瞻機器人</h4>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mt-2 leading-relaxed" data-i18n="histDesc4">入選道瓊永續指數。開發「行星式滾柱螺桿」卡位AI人形機器人長線賽道。</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Business Model Canvas (BMC - Beautiful Grids instead of basic big table for responsive feel) -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-table text-primary mr-2.5"></i> <span data-i18n="bmcTitle">商業模式帆布圖 (BMC)</span></h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <!-- Partners -->
+                    <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-800 md:row-span-2 flex flex-col justify-between">
+                        <div>
+                            <strong class="text-primary dark:text-blue-400 flex items-center gap-2 mb-3 text-base">
+                                <i class="fa-solid fa-handshake"></i> <span data-i18n="bmcKeyP">關鍵合作夥伴</span>
+                            </strong>
+                            <ul class="list-disc pl-4 text-xs text-gray-700 dark:text-gray-300 space-y-2">
+                                <li data-i18n="bmcKP1">半導體/自動化客戶</li>
+                                <li data-i18n="bmcKP2">原物料供應商</li>
+                                <li data-i18n="bmcKP3">學術機構與標準組織</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Activities & Resources -->
+                    <div class="space-y-4 md:col-span-1">
+                        <!-- Key Activities -->
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-800">
+                            <strong class="text-primary dark:text-blue-400 flex items-center gap-2 mb-3 text-base">
+                                <i class="fa-solid fa-bolt"></i> <span data-i18n="bmcKeyA">關鍵活動</span>
+                            </strong>
+                            <ul class="list-disc pl-4 text-xs text-gray-700 dark:text-gray-300 space-y-2">
+                                <li data-i18n="bmcKA1">精密傳動研發</li>
+                                <li data-i18n="bmcKA2">生產製造與品管</li>
+                                <li data-i18n="bmcKA3">全球行銷與服務</li>
+                            </ul>
+                        </div>
+                        <!-- Key Resources -->
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-800">
+                            <strong class="text-primary dark:text-blue-400 flex items-center gap-2 mb-3 text-base">
+                                <i class="fa-solid fa-layer-group"></i> <span data-i18n="bmcKeyR">關鍵資源</span>
+                            </strong>
+                            <ul class="list-disc pl-4 text-xs text-gray-700 dark:text-gray-300 space-y-2">
+                                <li data-i18n="bmcKR1">研發團隊與專利</li>
+                                <li data-i18n="bmcKR2">精密生產基地</li>
+                                <li data-i18n="bmcKR3">HIWIN 品牌聲譽</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Value Proposition (Highlighted Centrepiece) -->
+                    <div class="bg-blue-50 dark:bg-blue-950/40 p-6 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/60 md:row-span-2 flex flex-col justify-between">
+                        <div>
+                            <strong class="text-blue-700 dark:text-blue-300 flex items-center gap-2 mb-4 text-lg font-extrabold">
+                                <i class="fa-solid fa-gift"></i> <span data-i18n="bmcValue">價值主張</span>
+                            </strong>
+                            <ul class="list-disc pl-4 text-xs text-gray-700 dark:text-gray-300 space-y-3 leading-relaxed">
+                                <li data-i18n="bmcV1" class="font-semibold">全球領先的精密運動控制技術。</li>
+                                <li data-i18n="bmcV2">高品質滾珠螺桿與機器人零組件。</li>
+                                <li data-i18n="bmcV3">針對半導體、AI的客製化解決方案。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Customer Relationships & Channels -->
+                    <div class="space-y-4 md:col-span-1">
+                        <!-- Customer Relationships -->
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-800">
+                            <strong class="text-primary dark:text-blue-400 flex items-center gap-2 mb-3 text-base">
+                                <i class="fa-solid fa-heart"></i> <span data-i18n="bmcCustR">客戶關係</span>
+                            </strong>
+                            <ul class="list-disc pl-4 text-xs text-gray-700 dark:text-gray-300 space-y-2">
+                                <li data-i18n="bmcCR1">長期合作夥伴</li>
+                                <li data-i18n="bmcCR2">技術支援與售後</li>
+                                <li data-i18n="bmcCR3">ESG 永續承諾</li>
+                            </ul>
+                        </div>
+                        <!-- Channels -->
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-800">
+                            <strong class="text-primary dark:text-blue-400 flex items-center gap-2 mb-3 text-base">
+                                <i class="fa-solid fa-truck"></i> <span data-i18n="bmcChan">通路</span>
+                            </strong>
+                            <ul class="list-disc pl-4 text-xs text-gray-700 dark:text-gray-300 space-y-2">
+                                <li data-i18n="bmcCH1">全球直銷團隊</li>
+                                <li data-i18n="bmcCH2">海外子公司</li>
+                                <li data-i18n="bmcCH3">經銷商與國際展覽</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Customer Segments -->
+                    <div class="bg-white dark:bg-darkCard p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-800 md:row-span-2 flex flex-col justify-between">
+                        <div>
+                            <strong class="text-primary dark:text-blue-400 flex items-center gap-2 mb-3 text-base">
+                                <i class="fa-solid fa-users"></i> <span data-i18n="bmcCustS">客戶區隔</span>
+                            </strong>
+                            <ul class="list-disc pl-4 text-xs text-gray-700 dark:text-gray-300 space-y-2">
+                                <li data-i18n="bmcCS1">半導體設備商</li>
+                                <li data-i18n="bmcCS2">工具機製造商</li>
+                                <li data-i18n="bmcCS3">AI伺服器應用</li>
+                                <li data-i18n="bmcCS4">醫療/一般自動化</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BMC Footer (Costs and Revenues) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="bg-white dark:bg-darkCard p-5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
+                        <strong class="text-primary dark:text-blue-400 flex items-center gap-2 mb-2 text-base"><i class="fa-solid fa-tags"></i> <span data-i18n="bmcCost">成本結構</span></strong>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="bmcCostDesc">研發投入成本、生產製造費用(材料/人工)、全球行銷、人力資源與管理費用。</p>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
+                        <strong class="text-primary dark:text-blue-400 flex items-center gap-2 mb-2 text-base"><i class="fa-solid fa-coins"></i> <span data-i18n="bmcRev">收益流</span></strong>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="bmcRevDesc">精密傳動元件(滑軌/螺桿)銷售、工業機器人/設備收入、客製化次系統解決方案。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financials (With Interactive SVG Graphics for visual excellence) -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-chart-line text-primary mr-2.5"></i> <span data-i18n="finTitle">財務績效與同業比較 (2021-2025)</span></h3>
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- Left: HIWIN Performance & Custom SVG bar chart -->
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
+                        <h4 class="font-bold text-lg mb-4 text-center text-slate-900 dark:text-white" data-i18n="finHIWIN">上銀科技近五年績效</h4>
+                        
+                        <!-- Beautiful SVG Bar Chart -->
+                        <div class="mb-6 flex justify-center">
+                            <svg class="w-full max-w-md h-48" viewBox="0 0 500 200">
+                                <!-- Background lines -->
+                                <line x1="40" y1="20" x2="480" y2="20" stroke="#E2E8F0" stroke-dasharray="4" class="dark:stroke-gray-700" />
+                                <line x1="40" y1="80" x2="480" y2="80" stroke="#E2E8F0" stroke-dasharray="4" class="dark:stroke-gray-700" />
+                                <line x1="40" y1="140" x2="480" y2="140" stroke="#E2E8F0" stroke-dasharray="4" class="dark:stroke-gray-700" />
+                                <line x1="40" y1="170" x2="480" y2="170" stroke="#94A3B8" class="dark:stroke-gray-600" />
+                                
+                                <!-- Bar 2021 (Value: 272.6) -->
+                                <rect class="chart-bar fill-blue-400 dark:fill-blue-500" x="65" y="44" width="30" height="126" rx="4" />
+                                <text x="80" y="188" fill="#64748B" font-size="11" text-anchor="middle">2021</text>
+                                <text x="80" y="36" fill="#0056b3" class="dark:fill-blue-400" font-size="10" font-weight="bold" text-anchor="middle">272.6</text>
+                                
+                                <!-- Bar 2022 (Value: 293.1 - Max) -->
+                                <rect class="chart-bar fill-primary" x="155" y="32" width="30" height="138" rx="4" />
+                                <text x="170" y="188" fill="#64748B" font-size="11" text-anchor="middle">2022</text>
+                                <text x="170" y="24" fill="#0056b3" class="dark:fill-blue-400" font-size="10" font-weight="bold" text-anchor="middle">293.1</text>
+                                
+                                <!-- Bar 2023 (Value: 246.3) -->
+                                <rect class="chart-bar fill-blue-400 dark:fill-blue-500" x="245" y="58" width="30" height="112" rx="4" />
+                                <text x="260" y="188" fill="#64748B" font-size="11" text-anchor="middle">2023</text>
+                                <text x="260" y="50" fill="#0056b3" class="dark:fill-blue-400" font-size="10" font-weight="bold" text-anchor="middle">246.3</text>
+                                
+                                <!-- Bar 2024 (Value: 243.9) -->
+                                <rect class="chart-bar fill-blue-400 dark:fill-blue-500" x="335" y="60" width="30" height="110" rx="4" />
+                                <text x="350" y="188" fill="#64748B" font-size="11" text-anchor="middle">2024</text>
+                                <text x="350" y="52" fill="#0056b3" class="dark:fill-blue-400" font-size="10" font-weight="bold" text-anchor="middle">243.9</text>
+                                
+                                <!-- Bar 2025 (Value: 242.6) -->
+                                <rect class="chart-bar fill-blue-400 dark:fill-blue-500" x="425" y="61" width="30" height="109" rx="4" />
+                                <text x="440" y="188" fill="#64748B" font-size="11" text-anchor="middle">2025</text>
+                                <text x="440" y="53" fill="#0056b3" class="dark:fill-blue-400" font-size="10" font-weight="bold" text-anchor="middle">242.6</text>
+                            </svg>
+                        </div>
+
+                        <!-- Mini Table inside -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-center">
+                                <thead class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                    <tr>
+                                        <th class="p-2.5 rounded-l-lg">Year</th>
+                                        <th class="p-2.5" data-i18n="fRev">營收(億)</th>
+                                        <th class="p-2.5" data-i18n="fGM">毛利率</th>
+                                        <th class="p-2.5 rounded-r-lg">EPS</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                    <tr><td class="p-2.5">2021</td><td class="p-2.5 font-semibold">272.6</td><td class="p-2.5 text-slate-500">35.8%</td><td class="p-2.5 font-bold">10.36</td></tr>
+                                    <tr class="bg-blue-50/40 dark:bg-blue-950/20"><td class="p-2.5 font-bold text-primary dark:text-blue-400">2022</td><td class="p-2.5 font-bold text-primary dark:text-blue-400">293.1</td><td class="p-2.5 font-bold text-primary dark:text-blue-400">36.2%</td><td class="p-2.5 font-bold text-primary dark:text-blue-400">12.98</td></tr>
+                                    <tr><td class="p-2.5">2023</td><td class="p-2.5 font-semibold">246.3</td><td class="p-2.5 text-slate-500">30.9%</td><td class="p-2.5">5.75</td></tr>
+                                    <tr><td class="p-2.5">2024</td><td class="p-2.5 font-semibold">243.9</td><td class="p-2.5 text-slate-500">29.5%</td><td class="p-2.5">5.57</td></tr>
+                                    <tr><td class="p-2.5">2025</td><td class="p-2.5 font-semibold">242.6</td><td class="p-2.5 text-slate-500">28.7%</td><td class="p-2.5">4.31</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg" data-i18n="finNote1">分析：21-22年受惠半導體擴廠需求爆發；23-25年受高通膨與去庫存影響進入盤整期。</p>
+                    </div>
+                    
+                    <!-- Right: Comparison with THK -->
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-bold text-lg mb-4 text-center text-slate-900 dark:text-white" data-i18n="finVs">近期競爭對手比較 (vs. 日本 THK)</h4>
+                            
+                            <!-- Visual Ring Charts Comparison side-by-side -->
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-blue-50/50 dark:bg-blue-950/20 p-4 rounded-2xl text-center">
+                                    <p class="text-xs text-slate-500 mb-1" data-i18n="fGM">毛利率</p>
+                                    <div class="text-2xl font-black text-primary dark:text-blue-400">29.6%</div>
+                                    <p class="text-xs text-slate-400 mt-1">HIWIN</p>
+                                </div>
+                                <div class="bg-red-50/50 dark:bg-red-950/20 p-4 rounded-2xl text-center">
+                                    <p class="text-xs text-slate-500 mb-1" data-i18n="fGM">毛利率</p>
+                                    <div class="text-2xl font-black text-red-600 dark:text-red-400">29.3%</div>
+                                    <p class="text-xs text-slate-400 mt-1">THK (Japan)</p>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-center">
+                                    <thead class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                        <tr>
+                                            <th class="p-2.5 rounded-l-lg text-left pl-4" data-i18n="fMetric">指標 (2024)</th>
+                                            <th class="p-2.5">HIWIN</th>
+                                            <th class="p-2.5 rounded-r-lg">THK</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                        <tr>
+                                            <td class="p-3 text-left pl-4" data-i18n="fRevG">營收成長率</td>
+                                            <td class="p-3 text-green-600 font-bold">-0.98%</td>
+                                            <td class="p-3 text-red-500 font-semibold">-36.71%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-3 text-left pl-4" data-i18n="fGM">毛利率</td>
+                                            <td class="p-3 font-bold">29.6%</td>
+                                            <td class="p-3">29.3%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-3 text-left pl-4" data-i18n="fRDE">研發費用率</td>
+                                            <td class="p-3 font-bold text-primary dark:text-blue-400">3.95%</td>
+                                            <td class="p-3">3.17%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-3 text-left pl-4" data-i18n="fInv">存貨週轉率</td>
+                                            <td class="p-3 font-bold text-green-600">2.31 次</td>
+                                            <td class="p-3">1.81 次</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg" data-i18n="finNote2">洞察：上銀垂直整合優勢顯現，毛利率追平對手，且衰退幅度遠小於THK，庫存去化較快。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financials Page Flip Cards (Cards 10-14: Financials & Business Performance Focus) -->
+            <div class="mt-8 bg-slate-100/50 dark:bg-slate-900/30 p-6 rounded-3xl border border-gray-200/50 dark:border-gray-800">
+                <div class="text-center mb-6">
+                    <h4 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="titleFinF">📊 財務與經營效能焦點翻卡</h4>
+                    <p class="text-xs text-slate-500 mt-1" data-i18n="clickToFlip">（點擊卡片翻面閱讀戰略解析）</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Card 10 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Financial • 10</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-boxes-packing text-rose-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card10Front">去庫存</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-rose-600 to-rose-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-rose-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card10Header">去庫存 (De-stocking)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" id="card10Back" data-i18n="card10Back">去庫存載入中...</p>
+                                <span class="text-[9px] text-rose-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 11 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-yellow-500 uppercase tracking-widest">Financial • 11</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-bolt-lightning text-yellow-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card11Front">外部環境衝擊</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-yellow-600 to-yellow-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-yellow-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card11Header">外部環境衝擊 (External Shock)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card11Back">外部環境衝擊載入中...</p>
+                                <span class="text-[9px] text-yellow-100 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 12 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-green-500 uppercase tracking-widest">Financial • 12</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-chart-line text-green-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card12Front">基期效應的反彈</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-green-600 to-green-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-green-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card12Header">基期效應的反彈 (Base Effect)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card12Back">基期效應的反彈載入中...</p>
+                                <span class="text-[9px] text-green-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 13 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Financial • 13</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-shield-halved text-cyan-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card13Front">挑戰者姿態</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-cyan-600 to-cyan-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-cyan-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card13Header">挑戰者姿態 (Challenger)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card13Back">挑戰者姿態載入中...</p>
+                                <span class="text-[9px] text-cyan-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 14 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-violet-500 uppercase tracking-widest">Financial • 14</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-microchip text-violet-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card14Front">機電整合</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-violet-600 to-violet-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-violet-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card14Header">機電整合 (Mechatronic)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card14Back">機電整合載入中...</p>
+                                <span class="text-[9px] text-violet-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE: ANALYSIS ================= -->
+        <section id="page-analysis" class="page-view">
+            <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
+                <h2 class="text-3xl font-extrabold flex items-center gap-3 text-slate-900 dark:text-white">
+                    <span class="w-2.5 h-8 bg-primary rounded-full block"></span>
+                    <span data-i18n="analysisTitle">外部環境與競爭者分析</span>
+                </h2>
+            </div>
+
+            <!-- PESTEL Grid Layout Upgraded -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6 text-center text-slate-900 dark:text-white" data-i18n="pestelTitle">PESTEL 總體環境分析</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-red-50/70 dark:bg-red-950/20 p-6 rounded-2xl border border-red-100 dark:border-red-900/50 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">P</div>
+                        <h4 class="font-bold text-red-800 dark:text-red-300 text-lg mb-2">P (政治 / Political)</h4>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" data-i18n="pP">地緣政治衝突、中美貿易戰引發 China+1 供應鏈重組；關稅與高階技術出口管制。</p>
+                    </div>
+                    
+                    <div class="bg-orange-50/70 dark:bg-orange-950/20 p-6 rounded-2xl border border-orange-100 dark:border-orange-900/50 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">E</div>
+                        <h4 class="font-bold text-orange-800 dark:text-orange-300 text-lg mb-2">E (經濟 / Economic)</h4>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" data-i18n="pE">高通膨高利率壓抑設備投資；但 AI 浪潮引發龐大資金投入半導體擴產。</p>
+                    </div>
+
+                    <div class="bg-yellow-50/70 dark:bg-yellow-950/20 p-6 rounded-2xl border border-yellow-100 dark:border-yellow-900/50 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">S</div>
+                        <h4 class="font-bold text-yellow-800 dark:text-yellow-300 text-lg mb-2">S (社會 / Social)</h4>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" data-i18n="pS">少子化與高齡化導致製造業嚴重缺工；社會對企業 ESG 永續要求空前提高。</p>
+                    </div>
+
+                    <div class="bg-blue-50/70 dark:bg-blue-950/20 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/50 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">T</div>
+                        <h4 class="font-bold text-blue-800 dark:text-blue-300 text-lg mb-2">T (技術 / Technological)</h4>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" data-i18n="pT">工業4.0智慧工廠、數位雙生(Digital Twin)普及；AI 深度嵌入供應鏈管理與產品。</p>
+                    </div>
+
+                    <div class="bg-green-50/70 dark:bg-green-950/20 p-6 rounded-2xl border border-green-100 dark:border-green-900/50 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">E</div>
+                        <h4 class="font-bold text-green-800 dark:text-green-300 text-lg mb-2">E (環境 / Environmental)</h4>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" data-i18n="pEn">2050淨零碳排壓力；國際客戶綠色採購規範；歐盟 CBAM 碳關稅新門檻。</p>
+                    </div>
+
+                    <div class="bg-purple-50/70 dark:bg-purple-950/20 p-6 rounded-2xl border border-purple-100 dark:border-purple-900/50 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400 rounded-xl flex items-center justify-center text-xl font-black mb-4">L</div>
+                        <h4 class="font-bold text-purple-800 dark:text-purple-300 text-lg mb-2">L (法律 / Legal)</h4>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" data-i18n="pL">全球專利戰白熱化與智財保護；減碳及減塑法規收緊；勞動人權審查趨嚴。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Analysis Flip Cards (Cards 15-19: PESTEL & Industry 4.0 Terminology Front) -->
+            <div class="mb-12 bg-slate-100/50 dark:bg-slate-900/30 p-6 rounded-3xl border border-gray-200/50 dark:border-gray-800">
+                <div class="text-center mb-6">
+                    <h4 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="titlePestelF">🌍 總體環境與智慧製造術語翻卡</h4>
+                    <p class="text-xs text-slate-500 mt-1" data-i18n="clickToFlip">（點擊卡片翻面閱讀戰略解析）</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Card 15 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">PESTEL • 15</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-network-wired text-slate-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card15Front">去中心化</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-slate-600 to-slate-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-slate-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card15Header">去中心化 (Decentralize)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card15Back">去中心化載入中...</p>
+                                <span class="text-[9px] text-slate-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 16 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">PESTEL • 16</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-globe text-blue-600 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card16Front">China+1 策略</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-blue-700 to-blue-900 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-blue-200 border-b border-white/20 pb-1 w-full text-left" data-i18n="card16Header">China+1 策略 (China+1)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card16Back">China+1 策略載入中...</p>
+                                <span class="text-[9px] text-blue-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 17 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest">PESTEL • 17</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-truck-ramp-box text-orange-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card17Front">無人搬運車</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-orange-600 to-orange-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-orange-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card17Header">無人搬運車 (AGV)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card17Back">無人搬運車載入中...</p>
+                                <span class="text-[9px] text-orange-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 18 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">PESTEL • 18</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-cubes text-emerald-600 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card18Front">數位雙生</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-emerald-600 to-emerald-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-emerald-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card18Header">數位雙生 (Digital Twin)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card18Back">數位雙生載入中...</p>
+                                <span class="text-[9px] text-emerald-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 19 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-teal-600 uppercase tracking-widest">PESTEL • 19</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-robot text-teal-600 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card19Front">智慧製造</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-teal-600 to-teal-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-teal-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card19Header">智慧製造 (Smart Mfg)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card19Back">智慧製造載入中...</p>
+                                <span class="text-[9px] text-teal-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competitors & Strategy Groups -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6 text-center text-slate-900 dark:text-white" data-i18n="compAnalTitle">競爭者與策略群組分析</h3>
+                
+                <div class="bg-white dark:bg-darkCard rounded-2xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-800">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-b border-gray-200 dark:border-gray-800">
+                                <tr>
+                                    <th class="p-4 font-bold w-1/4" data-i18n="sgCol1">公司 / 策略定位</th>
+                                    <th class="p-4 font-bold" data-i18n="sgCol2">技術程度</th>
+                                    <th class="p-4 font-bold w-1/12">國際化</th>
+                                    <th class="p-4 font-bold" data-i18n="sgCol3">主要競爭優勢 (AMC分析)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                                    <td class="p-4"><strong class="text-red-600 dark:text-red-400 text-base">THK (日本)</strong><br><span class="text-xs text-gray-500" data-i18n="sgT1">全球技術領導者</span></td>
+                                    <td class="p-4" data-i18n="sgT2">超精密、高階強磁場等特殊應用</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300 rounded text-xs" data-i18n="high">高</span></td>
+                                    <td class="p-4 text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="sgT3">動機在於維持技術規格制定者地位。具備品牌強、高端技術領先的絕對優勢。</td>
+                                </tr>
+                                <tr class="bg-blue-50/30 dark:bg-blue-950/10 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-colors">
+                                    <td class="p-4"><strong class="text-primary dark:text-blue-400 text-base">HIWIN 上銀科技</strong><br><span class="text-xs text-gray-500" data-i18n="sgH1">高精密智慧整合者</span></td>
+                                    <td class="p-4" data-i18n="sgH2">高精密、智慧化元件(i4.0BS)、客製化</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300 rounded text-xs" data-i18n="high">高</span></td>
+                                    <td class="p-4 text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="sgH3">具備強大成本彈性、垂直整合(大銀微系統)與全球快速服務能力，積極挑戰高階市場。</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                                    <td class="p-4"><strong class="text-green-600 dark:text-green-400 text-base">PMI 銀泰科技</strong><br><span class="text-xs text-gray-500" data-i18n="sgP1">中階高性價比廠商</span></td>
+                                    <td class="p-4" data-i18n="sgP2">標準化、大眾規格為主</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300 rounded text-xs" data-i18n="mid">中</span></td>
+                                    <td class="p-4 text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="sgP3">價格競爭力強、規格齊全，主攻對極高精度無特殊要求之中階標準品市場。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE: STRATEGY ================= -->
+        <section id="page-strategy" class="page-view">
+            <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
+                <h2 class="text-3xl font-extrabold flex items-center gap-3 text-slate-900 dark:text-white">
+                    <span class="w-2.5 h-8 bg-primary rounded-full block"></span>
+                    <span data-i18n="stratTitle">產業鏈價值網絡與人才戰略</span>
+                </h2>
+            </div>
+
+            <!-- Value Chain Analysis with Visual Path -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6 flex items-center text-slate-900 dark:text-white"><i class="fa-solid fa-link text-primary mr-2.5"></i> <span data-i18n="vcTitle">深度產業鏈解析</span></h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
+                    <!-- Upstream -->
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm relative group hover:shadow-md transition-all">
+                        <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-xl mb-4 text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-arrows-up-to-line"></i>
+                        </div>
+                        <h4 class="font-extrabold text-lg mb-2 text-slate-950 dark:text-white" data-i18n="vcUp">上遊：原料與加工</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="vcUpDesc">仰賴高品質特殊鋼材與精密熱處理。上銀導入 PDCA 品管與嚴格進料檢驗(IQC)，確保原物料具備微米級加工潛力。</p>
+                    </div>
+
+                    <!-- Midstream (Highlighted) -->
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-md relative group hover:shadow-lg transition-all">
+                        <div class="absolute top-4 right-4 bg-white/20 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase">HIWIN</div>
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl mb-4 text-white">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <h4 class="font-extrabold text-lg mb-2" data-i18n="vcMid">中遊：零組件與次系統</h4>
+                        <p class="text-sm text-blue-50/95" data-i18n="vcMidDesc">傳動系統與控制系統(大銀微)深度整合。透過在地化 Total Solution (如日本無塵室) 規避關稅壁壘。</p>
+                    </div>
+
+                    <!-- Downstream -->
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm relative group hover:shadow-md transition-all">
+                        <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-xl mb-4 text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <h4 class="font-extrabold text-lg mb-2 text-slate-950 dark:text-white" data-i18n="vcDown">下游：終端設備應用</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="vcDownDesc">受惠 AMAT/ASML 擴產的半導體設備、高階工具機、AI人形機器人(行星滾柱螺桿)及醫療復健領域。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Value Network & Group Integration Flip Cards (Cards 6-9: Value Chain & Integration Front) -->
+            <div class="mb-12 bg-slate-100/50 dark:bg-slate-900/30 p-6 rounded-3xl border border-gray-200/50 dark:border-gray-800">
+                <div class="text-center mb-6">
+                    <h4 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="titleChainF">⛓️ 價值網絡與集團整合翻卡</h4>
+                    <p class="text-xs text-slate-500 mt-1" data-i18n="clickToFlip">（點擊卡片翻面閱讀戰略解析）</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Card 6 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Network • 06</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-wifi text-sky-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card6Front">智慧型產品 i4.0GW</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-sky-600 to-sky-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-sky-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card6Header">智慧型產品 i4.0GW</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card6Back">智慧型產品 i4.0GW載入中...</p>
+                                <span class="text-[9px] text-sky-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 7 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Network • 07</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-handshake text-emerald-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card7Front">技術互補</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-emerald-600 to-emerald-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-emerald-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card7Header">技術互補 (Complement)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card7Back">技術互補載入中...</p>
+                                <span class="text-[9px] text-emerald-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 8 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-pink-500 uppercase tracking-widest">Network • 08</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-brain text-pink-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card8Front">2009年以色列投資</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-pink-600 to-pink-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-pink-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card8Header">以色列投資 (MegaFabs)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card8Back">2009年以色列投資載入中...</p>
+                                <span class="text-[9px] text-pink-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 9 -->
+                    <div class="flip-container h-[270px] cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-primary/50 transition-colors">
+                                <span class="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Network • 09</span>
+                                <div class="flex flex-col items-center my-auto">
+                                    <i class="fa-solid fa-chart-pie text-amber-500 mb-3 text-4xl"></i>
+                                    <h5 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-wide" data-i18n="card9Front">最大佔比產品</h5>
+                                </div>
+                                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Flip</span>
+                            </div>
+                            <div class="flip-card-back bg-gradient-to-br from-amber-600 to-amber-800 text-white rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                                <strong class="text-xs uppercase tracking-widest text-amber-100 border-b border-white/20 pb-1 w-full text-left" data-i18n="card9Header">最大佔比產品 (Major Prod)</strong>
+                                <p class="text-[11px] text-left leading-relaxed my-auto overflow-y-auto pr-1 h-[170px]" data-i18n="card9Back">最大佔比產品載入中...</p>
+                                <span class="text-[9px] text-amber-200 text-right"><i class="fa-solid fa-arrows-rotate mr-1"></i> Click to Reset</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 104 Jobs -->
+            <div>
+                <h3 class="text-2xl font-bold mb-4 flex items-center"><i class="fa-solid fa-magnifying-glass-chart text-orange-500 mr-2.5"></i> <span data-i18n="jobsTitle">104 職缺戰仗與洞察</span></h3>
+                
+                <div class="bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-orange-50 dark:bg-orange-950/30 text-orange-900 dark:text-orange-200 border-b border-orange-100 dark:border-orange-900/40">
+                                <tr>
+                                    <th class="p-4 font-bold w-1/4" data-i18n="jCol1">職缺分類維度</th>
+                                    <th class="p-4 font-bold w-1/3" data-i18n="jCol2">代表性職位與關鍵薪酬</th>
+                                    <th class="p-4 font-bold" data-i18n="jCol3">人力資本戰略意涵解析</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                <tr class="hover:bg-orange-50/10 dark:hover:bg-orange-950/5 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900 dark:text-white">高稼動率生產製造</td>
+                                    <td class="p-4">
+                                        <p class="font-semibold text-slate-800 dark:text-gray-200">(雲科廠) 技師</p>
+                                        <span class="inline-block mt-1 text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950 dark:text-orange-300 px-2 py-0.5 rounded">平均月薪 60K-77K (含輪班)</span>
+                                    </td>
+                                    <td class="p-4 text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="jDesc1">產能滿載，透過絕對薪資優勢確保高強度輪班與技術產出，穩固對半導體等大廠交期。</td>
+                                </tr>
+                                <tr class="hover:bg-orange-50/10 dark:hover:bg-orange-950/5 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900 dark:text-white">高階研發與數位轉型</td>
+                                    <td class="p-4">
+                                        <p class="font-semibold text-slate-800 dark:text-gray-200">機器人CAE工程師</p>
+                                        <p class="text-xs text-slate-400 mt-1">半導體設備工程師、全端設計師</p>
+                                    </td>
+                                    <td class="p-4 text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="jDesc2">挹注科學分析與軟硬整合能量，推動內部智慧製造，強攻半導體高階設備藍海。</td>
+                                </tr>
+                                <tr class="hover:bg-orange-50/10 dark:hover:bg-orange-950/5 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900 dark:text-white">全球行銷與法務佈局</td>
+                                    <td class="p-4">
+                                        <p class="font-semibold text-slate-800 dark:text-gray-200">國際業務專員 (精通多語)</p>
+                                        <p class="text-xs text-slate-400 mt-1">專利智權工程師</p>
+                                    </td>
+                                    <td class="p-4 text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="jDesc3">藉由多語人才深化美日與東南亞在地化服務，並建構堅實的國際專利防禦火網。</td>
+                                </tr>
+                                <tr class="hover:bg-orange-50/10 dark:hover:bg-orange-950/5 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900 dark:text-white">組織治理與環境維護</td>
+                                    <td class="p-4">
+                                        <p class="font-semibold text-slate-800 dark:text-gray-200">人資主管</p>
+                                        <span class="inline-block mt-1 text-xs font-bold text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-300 px-2 py-0.5 rounded" data-i18n="hrSalary">年薪150W+</span>
+                                        <p class="text-[11px] text-slate-400 mt-1">內控稽核、專職園藝清潔維護</p>
+                                    </td>
+                                    <td class="p-4 text-gray-600 dark:text-gray-400 leading-relaxed" data-i18n="jDesc4">應對六千人跨國管理難度，高薪強化留才合規；編制專職園藝落實優質環境 ESG 承諾。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE: QUIZ (Interactive UX Upgrade) ================= -->
+        <section id="page-quiz" class="page-view">
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2" data-i18n="quizTitle">策略大考驗 (互動問答)</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">自我檢測您對上銀科技國際策略的理解！</p>
+                </div>
+                
+                <div id="quiz-container" class="bg-white dark:bg-darkCard p-8 rounded-3xl shadow-premium dark:shadow-premium-dark border border-gray-100 dark:border-gray-800">
+                    <div class="flex justify-between items-center text-sm mb-6 border-b pb-4 dark:border-gray-800">
+                        <span id="quiz-progress" class="font-extrabold text-primary dark:text-blue-400">Question 1 / 15</span>
+                        <span id="quiz-score" class="font-extrabold px-3 py-1 bg-blue-50 dark:bg-blue-950/50 text-primary dark:text-blue-300 rounded-full">Score: 0</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 dark:bg-gray-800 h-2 rounded-full mb-8 overflow-hidden">
+                        <div id="quiz-progressbar" class="bg-primary dark:bg-blue-500 h-full w-1/15 transition-all duration-300"></div>
+                    </div>
+                    
+                    <h3 id="question-text" class="text-xl font-bold mb-6 text-gray-800 dark:text-white leading-relaxed">載入中...</h3>
+                    
+                    <div id="options-container" class="space-y-4">
+                        <!-- Options injected dynamically -->
+                    </div>
+
+                    <div id="quiz-result" class="mt-8 text-center hidden">
+                        <div class="w-24 h-24 bg-yellow-100 dark:bg-yellow-950 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fa-solid fa-trophy text-5xl text-yellow-500"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-primary dark:text-blue-400 mb-2" id="result-title">測驗完成！</h3>
+                        <p id="result-desc" class="mb-8 text-lg font-medium text-slate-600 dark:text-slate-300">您的得分是...</p>
+                        <button onclick="resetQuiz()" class="bg-primary hover:bg-primaryHover text-white px-8 py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all font-bold tracking-wide" data-i18n="btnRestart">再挑戰一次</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE: REFERENCES ================= -->
+        <section id="page-references" class="page-view mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
+            <h2 class="text-2xl font-bold border-l-4 border-slate-400 pl-4 mb-6 text-slate-800 dark:text-gray-300" data-i18n="refTitle">引用資料</h2>
+            <div class="bg-white dark:bg-darkCard p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-400">
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
+                        <span>
+                            <strong class="text-slate-800 dark:text-slate-300" data-i18n="refHiwin">上銀科技 (HIWIN) 官方網站：</strong> 
+                            <a href="https://www.hiwin.tw/" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-1">https://www.hiwin.tw/ <i class="fa-solid fa-link text-xs"></i></a>
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
+                        <span>
+                            <strong class="text-slate-800 dark:text-slate-300" data-i18n="ref104">104 人力銀行 (上銀科技職位參考)：</strong> 
+                            <a href="https://www.104.com.tw/company/a444a70" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-1">104 企業專頁 <i class="fa-solid fa-link text-xs"></i></a>
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
+                        <span>
+                            <strong class="text-slate-800 dark:text-slate-300" data-i18n="refMOPS">公開資訊觀測站 (財務報表)：</strong> 
+                            <a href="https://mops.twse.com.tw/" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-1">https://mops.twse.com.tw/ <i class="fa-solid fa-link text-xs"></i></a>
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-square-arrow-up-right text-primary mt-1"></i>
+                        <span class="text-slate-700 dark:text-slate-400">課堂 TPO 資料與各組員影片分析報告。</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-gray-300 py-10 text-center border-t-4 border-primary">
+        <div class="max-w-4xl mx-auto px-4">
+            <h3 class="font-extrabold text-2xl mb-2 text-white tracking-wider">上銀科技 HIWIN 國際策略分析研究</h3>
+            <p class="font-medium text-blue-400 text-lg mb-1">課程名稱：1142 國際策略管理</p>
+            <p class="mb-6 text-gray-400 text-sm">授課教師：梅筱珍 教授</p>
+            <div class="text-xs text-gray-500 flex flex-wrap justify-center items-center gap-4 border-t border-slate-800 pt-6">
+                <span>製作團隊：第 9 組 (G9)</span>
+                <span class="hidden md:inline text-slate-700">•</span>
+                <span>精美響應式單頁網頁 (Bilingual SPA App)</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- 1. SPA Navigation System ---
+        function switchPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            // Remove active class from nav links
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            
+            // Show target page
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+            
+            // Highlight nav link
+            const activeNav = document.querySelector(`.nav-link[data-nav="${pageId}"]`);
+            if(activeNav) activeNav.classList.add('active');
+
+            // Handle references visibility dynamically
+            if(pageId !== 'quiz' && pageId !== 'home') {
+                 document.getElementById('page-references').classList.add('active');
+            } else {
+                 document.getElementById('page-references').classList.remove('active');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Mobile Menu Toggle logic
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuBtnIcon = document.querySelector('#mobile-menu-btn i');
+            
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+                menuBtnIcon.className = "fa-solid fa-xmark text-xl";
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuBtnIcon.className = "fa-solid fa-bars text-xl";
+            }
+        }
+
+        // --- 2. Bilingual System (i18n) ---
+        const translations = {
+            zh: {
+                navHome: "首頁與團隊", navCompany: "公司介紹", navAnalysis: "市場資源分析", navStrategy: "成長策略", navQuiz: "互動問答",
+                heroTitle: "上銀科技 (HIWIN)", heroSubtitle: "全球傳動控制產品與系統科技產品的專業製造領導巨擘。「與我們共事，您將成為高科技的贏家。」",
+                teamTitle: "團隊成員與分工 (G9)",
+                mWangName: "王奕翔", mWangDept: "教政四", mWangJob: "公司簡介、產業鏈分析、104職缺",
+                mLiaoName: "廖翊辰", mLiaoDept: "管學三", mLiaoJob: "產品組合、商業模式帆布圖",
+                mLinName: "林振宸", mLinDept: "管學三", mLinJob: "上銀財報分析及績效整理",
+                mYangName: "楊勛仲", mYangDept: "管學三", mYangJob: "成員及網頁進度管理",
+                mWuName: "吳易儒", mWuDept: "管學三", mWuJob: "PESTEL分析、資料統整",
+                mLaiName: "賴瑞逢", mLaiDept: "國企三", mLaiJob: "網頁統整、競爭對手分析",
+                btnPresentation: "簡報影片",
+                aiTitle: "AI 工具使用聲明", aiDesc: "本專案使用 Gemini 協助網頁程式碼結構生成與 Tailwind CSS 排版（SPA單頁應用框架、雙語切換邏輯）；文本內容翻譯則輔以翻譯工具進行潤飾。所有策略分析內容皆為團隊成員基於課堂理論自行統整與產出。",
+                compTitle: "公司介紹與發展", prodTitle: "核心產品組合",
+                prod1: "一、精密傳動元件", prod1_1: "滾珠螺桿：旋轉轉線性，高精度定位。", prod1_2: "線性滑軌：高剛性、高負載線性平台。", prod1_3: "交叉滾柱軸承：高精度旋轉運動。",
+                prod2: "二、機器人與自動化", prod2_1: "工業機器人 (多關節, SCARA)。", prod2_2: "諧波減速機：機器人關節核心。", prod2_3: "單軸模組及次系統整合。",
+                prod3: "三、新興應用領域", prod3_1: "AI伺服器：散熱模組與傳動元件。", prod3_2: "半導體：晶圓移載模組(EFEM)。", prod3_3: "醫療產業：下肢復健機器人。",
+                historyTitle: "四階段歷史沿革",
+                histPhase1: "奠基與早期國際化", histDesc1: "創立並積極海外佈局。1993年併購德國HOLZER公司，直接跨越日系技術壁壘。",
+                histPhase2: "產能擴張與研發深化", histDesc2: "2009年掛牌上市。策略投資以色列控制器廠MegaFabs，邁向機電系統供應商。",
+                histPhase3: "智慧製造與醫療跨界", histDesc3: "研發智慧型滾珠螺桿(i4.0BS)，打入醫療(ISO 13485)與半導體高階供應鏈。",
+                histPhase4: "ESG領導與前瞻機器人", histDesc4: "入選道瓊永續指數。開發「行星式滾柱螺桿」卡位AI人形機器人長線賽道。",
+                bmcTitle: "商業模式帆布圖 (BMC)", bmcKeyP: "關鍵合作夥伴", bmcKP1: "半導體/自動化客戶", bmcKP2: "原物料供應商", bmcKP3: "學術機構與標準組織",
+                bmcKeyA: "關鍵活動", bmcKA1: "精密傳動研發", bmcKA2: "生產製造與品管", bmcKA3: "全球行銷與服務",
+                bmcKeyR: "關鍵資源", bmcKR1: "研發團隊與專利", bmcKR2: "精密生產基地", bmcKR3: "HIWIN 品牌聲譽",
+                bmcValue: "價值主張", bmcV1: "全球領先的精密運動控制技術。", bmcV2: "高品質滾珠螺桿與機器人零組件。", bmcV3: "針對半導體、AI的客製化解決方案。",
+                bmcCustR: "客戶關係", bmcCR1: "長期合作夥伴", bmcCR2: "技術支援與售後", bmcCR3: "ESG 永續承諾",
+                bmcChan: "通路", bmcCH1: "全球直銷團隊", bmcCH2: "海外子公司", bmcCH3: "經銷商與國際展覽",
+                bmcCustS: "客戶區隔", bmcCS1: "半導體設備商", bmcCS2: "工具機製造商", bmcCS3: "AI伺服器應用", bmcCS4: "醫療/一般自動化",
+                bmcCost: "成本結構", bmcCostDesc: "研發投入成本、生產製造費用(材料/人工)、全球行銷、人力資源與管理費用。",
+                bmcRev: "收益流", bmcRevDesc: "精密傳動元件(滑軌/螺桿)銷售、工業機器人/設備收入、客製化次系統解決方案。",
+                finTitle: "財務績效與同業比較 (2021-2025)", finHIWIN: "上銀科技近五年績效", fRev: "營收(億)", fGM: "毛利率", fEPS: "EPS",
+                finNote1: "分析：21-22年受惠半導體擴廠需求爆發；23-25年受高通膨與去庫存影響進入盤整期。",
+                finVs: "近期競爭對手比較 (vs. 日本 THK)", fMetric: "指標 (2024)", fRevG: "營收成長率", fRDE: "研發費用率", fInv: "存貨週轉率",
+                finNote2: "洞察：上銀垂直整合優勢顯現，毛利率追平對手，且衰退幅度遠小於THK，庫存去化較快。",
+                analysisTitle: "外部環境與競爭者分析", pestelTitle: "PESTEL 總體環境分析",
+                pP: "地緣政治衝突、中美貿易戰引發 China+1 供應鏈重組；關稅與高階技術出口管制。",
+                pE: "高通膨高利率壓抑設備投資；但 AI 浪潮引發龐大資金投入半導體擴產。",
+                pS: "少子化與高齡化導致製造業嚴重缺工；社會對企業 ESG 永續要求空前提高。",
+                pT: "工業4.0智慧工廠、數位雙生(Digital Twin)普及；AI 深度嵌入供應鏈管理與產品。",
+                pEn: "2050淨零碳排壓力；國際客戶綠色採購規範；歐盟 CBAM 碳關稅新門檻。",
+                pL: "全球專利戰白熱化與智財保護；減碳及減塑法規收緊；勞動人權審查趨嚴。",
+                compAnalTitle: "競爭者與策略群組分析", sgCol1: "公司 / 策略定位", sgCol2: "技術程度", sgCol3: "主要競爭優勢 (AMC分析)",
+                sgT1: "全球技術領導者", sgT2: "超精密、高階強磁場等特殊應用", sgT3: "動機在於維持技術規格制定者地位。具備品牌強、高端技術領先的絕對優勢。",
+                sgH1: "高精密智慧整合者", sgH2: "高精密、智慧化元件(i4.0BS)、客製化", sgH3: "具備強大成本彈性、垂直整合(大銀微系統)與全球快速服務能力，積極挑戰高階市場。",
+                sgP1: "中階高性價比廠商", sgP2: "標準化、大眾規格為主", sgP3: "價格競爭力強、規格齊全，主攻對極高精度無特殊要求之中階標準品市場。",
+                stratTitle: "產業鏈價值網絡與人才戰略", vcTitle: "深度產業鏈解析",
+                vcUp: "上游：原料與加工", vcUpDesc: "仰賴高品質特殊鋼材與精密熱處理。上銀導入 PDCA 品管與嚴格進料檢驗(IQC)，確保原物料具備微米級加工潛力。",
+                vcMid: "中游：零組件與次系統", vcMidDesc: "傳動系統與控制系統(大銀微)深度整合。透過在地化 Total Solution (如日本無塵室) 規避關稅壁壘。",
+                vcDown: "下游：終端設備應用", vcDownDesc: "受惠 AMAT/ASML 擴產的半導體設備、高階工具機、AI人形機器人(行星滾柱螺桿)及醫療復健領域。",
+                jobsTitle: "104 職缺戰仗與洞察", jCol1: "職缺分類維度", jCol2: "代表性職位與關鍵薪酬", jCol3: "人力資本戰略意涵解析",
+                jDesc1: "產能滿載，透過絕對薪資優勢確保高強度輪班與技術產出，穩固對半導體等大廠交期。",
+                jDesc2: "挹注科學分析與軟硬整合能量，推動內部智慧製造，強攻半導體高階設備藍海。",
+                jDesc3: "藉由多語人才深化美日與東南亞在地化服務，並建構堅實的國際專利防禦火網。",
+                jDesc4: "應對六千人跨國管理難度，高薪強化留才合規；編制專職園藝落實優質環境 ESG 承諾。",
+                quizTitle: "策略大考驗 (互動問答)", btnRestart: "再挑戰一次",
+                refTitle: "引用資料", refHiwin: "上銀科技 (HIWIN) 官方網站：", ref104: "104 人力銀行 (上銀科技職位參考)：", refMOPS: "公開資訊觀測站 (財務報表)：",
+                high: "高", mid: "中", hrSalary: "年薪150W+",
+                
+                // --- 19 Flip Cards translations ---
+                titleProdF: "📦 產品與商模核心詞彙翻卡區",
+                titleFinF: "📊 財務與經營效能焦點翻卡",
+                titlePestelF: "🌍 總體環境與智慧製造術語翻卡",
+                titleChainF: "⛓️ 價值網絡與集團整合翻卡",
+                clickToFlip: "（點擊卡片翻面閱讀戰略解析）",
+                
+                card1Front: "滾珠螺桿",
+                card1Header: "滾珠螺桿 (Ball Screw)",
+                card1Back: "<b>【定義】</b>一種將旋轉運動轉化為線性運動（或逆向轉化）的高效率傳動元件。它在螺桿與螺帽之間加入了精密鋼珠作為滾動介質。<br><br><b>【白話解釋】</b>想像一般鎖螺絲時，轉動螺絲起子（旋轉運動），螺絲就會往木頭裡推進（線性運動）。普通螺絲摩擦力很大，而滾珠螺桿因為裡面塞滿了「彈珠」，讓滑動摩擦變成了滾動摩擦，所以轉起來極為順暢、省力，且定位精準到微米等級，是精密機台的靈魂。",
+                
+                card2Front: "線性滑軌",
+                card2Header: "線性滑軌 (Linear Guideway)",
+                card2Back: "<b>【定義】</b>用於支撐和引導運動部件，使其沿著給定方向做往復直線運動的導向元件。<br><br><b>【白話解釋】</b>就像高鐵的「軌道」一樣。在自動化機台或工具機裡，沈重的加工機頭需要前後左右移動，線性滑軌就是那條高強度的軌道，不僅要讓機頭滑動時毫無阻力，還要確保它在承受幾百公斤甚至幾噸的重量時，絕對不會搖晃、偏離軌道。",
+                
+                card3Front: "諧波減速機",
+                card3Header: "諧波減速機 (Harmonic Drive)",
+                card3Back: "<b>【定義】</b>一種由柔性齒輪、剛性齒輪及波產生器組成的高精度減速傳動裝置，主要用於需要高扭矩、高減速比及超低背隙（空轉間隙）的場合。<br><br><b>【白話解釋】</b>馬達轉速通常漸快，但力量不夠大。減速機的作用就是「降低轉速、放大力量」。而「諧波」減速機最厲害的地方在於它體積小、重量輕，而且齒輪咬合極度緊密，幾乎沒有一絲空隙（背隙）。這讓機器人關節在停下來的時候，不會產生晃動，是多關節機器人最核心的核心組件。",
+                
+                card4Front: "價值主張",
+                card4Header: "價值主張 (Value Proposition)",
+                card4Back: "<b>【定義】</b>商業模式畫布的核心要素，指企業承諾為客戶創造價值、解決痛點或滿足需求所提供的產品、服務或獨特優勢的組合。<br><br><b>【白話解釋】</b>這就是回答客戶一句話：「我為什麼要跟你買，而不是跟你的對手買？」以上銀來說，他們的價值主張不是「我很便宜」，而是「我能提供全球領先的高精度控制技術、客製化解決方案，幫你的工廠大幅提升產能」。",
+                
+                card5Front: "客戶區隔",
+                card5Header: "客戶區隔 (Customer Segments)",
+                card5Back: "<b>【定義】</b>企業所鎖定、並企圖提供服務與創造價值的一個或多個特定客戶群體或組織。<br><br><b>【白話解釋】</b>這代表企業要將資源集中在「誰」身上。上銀做的是B2B（企業對企業）生意，所以他們的客戶區隔不是一般消費者，而是半導體設備商、工具機廠、AI伺服器製造商等需要精密自動化零件的特定產業廠商。",
+                
+                card6Front: "智慧型產品 i4.0GW",
+                card6Header: "智慧型產品 i4.0GW",
+                card6Back: "<b>【智慧型線性滑軌】</b>即「智慧型線性滑軌」。在智慧化元件中，i4.0GW 整合感測技術，可即時監測潤滑、溫升與振動，提供預報維護與自我檢測機能，是智慧機械（Industry 4.0）的核心元件技術。",
+                
+                card7Front: "技術互補",
+                card7Header: "技術互補 (Complementarity)",
+                card7Back: "<b>【技術協同與互補】</b>上銀科技與其關聯企業「大銀微系統」在技術上高度互補。上銀專精「精密機械傳動」（滑軌、螺桿），而大銀微系統則專精於「精密運動控制與馬達」，兩者軟硬體結合提供完整的一站式機電整合解決方案。",
+                
+                card8Front: "2009年以色列投資",
+                card8Header: "以色列投資 (MegaFabs)",
+                card8Back: "<b>【MegaFabs 戰略佈局】</b>上銀科技於 2009 年策略性投資以色列運動控制器大廠 MegaFabs Motion Systems LTD，此舉幫助上銀成功補足、吸收了機電整合解決方案中，不可或缺的「大腦」控制器硬體技術。",
+                
+                card9Front: "最大佔比產品",
+                card9Header: "最大佔比產品 (Major Prod)",
+                card9Back: "<b>【最大營收佔比產品】</b>「線性滑軌」目前是上銀科技營收與出貨中佔比最大、最核心的主力產品，廣泛供應全球半導體、高階工具機與智慧自動化設備的基礎承重與直線滑軌高精密定位。",
+                
+                card10Front: "去庫存",
+                card10Header: "去庫存 (De-stocking)",
+                card10Back: "<b>【定義】</b>企業為了降低資金積壓與跌價損失，透過減少進貨、降價促銷等方式來消化累積庫存的過程。<br><br><b>【報告情境】</b>2023-2025年受到全球通膨與升息政策影響，工具機產業進入漫長的「去庫存」下行週期；而上銀在此期間展現了比日本THK更靈活的庫存調整速度與存貨週轉效能。",
+                
+                card11Front: "外部環境衝擊",
+                card11Header: "外部環境衝擊 (Shock)",
+                card11Back: "<b>【定義】</b>來自企業自身無法控制的外部巨觀環境變化（如地緣政治、戰爭、疫情、總體經濟政策），對企業營運造成的重大干擾。<br><br><b>【報告情境】</b>上銀的線性滑軌在2019年受到中美貿易戰的外部衝擊，屬於成熟穩定期正常的總體波動，而非產品本身過時被市場淘汰。",
+                
+                card12Front: "基期效應的反彈",
+                card12Header: "基期效應的反彈 (Base Effect)",
+                card12Back: "<b>【定義】</b>財務上的「基期效應」。當前一年的數據（基期）非常差時，隔年只要營運稍微回穩，在計算年增率（YoY）時就會顯現出非常驚人的成長百分比。<br><br><b>【報告情境】</b>競爭對手日本THK於2025年營收成長率呈現+7.95%的反彈，並非代表其市場需求大爆發，而是因為2024年基期（-36.71%）過低所致。",
+                
+                card13Front: "挑戰者姿態",
+                card13Header: "挑戰者姿態 (Challenger)",
+                card13Back: "<b>【定義】</b>市場上的第二或第三大企業，在面對產業龍頭時，採取更積極的策略（如擴大研發、價格戰或多元佈局）來爭取市佔率。<br><br><b>【報告情境】</b>面對龍頭THK，上銀科技在下行期仍逐年拉高「研發費用率」至4.22%（2025），並深化海外多元佈局，展現了極具侵略性的技術挑戰者姿態。",
+                
+                card14Front: "機電整合",
+                card14Header: "機電整合 (Mechatronic)",
+                card14Back: "<b>【定義】</b>將傳統的機械零組件（如滑軌、螺桿）與電子、控制、驅動、軟體等系統深度結合的完整一體化產品。<br><br><b>【報告情境】</b>這是上銀科技的核心策略轉型。從純零組件供應商，升級為機電整合系統提供商，藉此跨足高階醫療（如復健機器人）與新能源車、半導體等新興藍海領域。",
+                
+                card15Front: "去中心化",
+                card15Header: "去中心化 (Decentralize)",
+                card15Back: "<b>【定義】</b>在供應鏈管理中，指的是企業不再將所有的生產線、決策權或資源集中在單一國家、單一工廠或單一總部。透過將營運分散到不同的據點，可以降低因為單一地區發生天災、戰爭或政策改變而導致全面停擺的風險。",
+                
+                card16Front: "China+1 策略",
+                card16Header: "China+1 策略",
+                card16Back: "<b>【定義】</b>是一種跨國企業的供應鏈策略。因為中美貿易戰、關稅增加以及中國勞動力成本上升，企業為了分散風險，除了原本在中國的工廠外，會選擇在東南亞（如越南、泰國、印度）或其他地區設立「另一個生產基地」，規避國際貿易壁壘。",
+                
+                card17Front: "無人搬運車",
+                card17Header: "無人搬運車 (AGV)",
+                card17Back: "<b>【定義】</b>無人搬運車（AGV）。不需要人工駕駛的運輸車輛。它會透過地上的磁條、雷達感測或光學導航，在工廠或倉庫內自動搬運原物料、半成品或貨物。這是解決缺工問題、提升自動化物流效率的重要設備。",
+                
+                card18Front: "數位雙生",
+                card18Header: "數位雙生 (Digital Twin)",
+                card18Back: "<b>【定義】</b>透過感測器收集實體設備（如一台機器、一條生產線，甚至整座工廠）的即時數據，在虛擬世界中建立一個一模一樣的3D數位模型。工程師可以在這個「虛擬雙胞胎」上進行測試、模擬和預測哪裡會故障，確認沒問題後再應用到真實設備上，藉此降低試錯成本與停機風險。",
+                
+                card19Front: "智慧製造",
+                card19Header: "智慧製造 (Smart Mfg)",
+                card19Back: "<b>【定義】</b>智慧製造（Industry 4.0）。結合了物聯網（IoT）、大數據、人工智慧（AI）與自動化機器人等技術，讓工廠裡的機器不再只是死板地運作，而是能夠互相交換資訊。當產線發生問題或訂單改變時，系統能自動分析數據並即時調整生產節奏，達到最高效率與客製化的生產目標。"
+            },
+            en: {
+                navHome: "Home & Team", navCompany: "Company", navAnalysis: "Market Analysis", navStrategy: "Strategy", navQuiz: "Quiz",
+                heroTitle: "HIWIN Technologies", heroSubtitle: "A global leader in precision motion control and system technology. 'With us, you are a HI-tech WINner.'",
+                teamTitle: "Team Members (G9)",
+                mWangName: "Yi-Xiang Wang", mWangDept: "Ed. Policy & Admin (Senior)", mWangJob: "Company Profile, Value Chain, 104 Job Analysis",
+                mLiaoName: "Yi-Chen Liao", mLiaoDept: "Management Science (Junior)", mLiaoJob: "Product Portfolio, Business Model Canvas (BMC)",
+                mLinName: "Zhen-Chen Lin", mLinDept: "Management Science (Junior)", mLinJob: "Financial Reports & Performance Analysis",
+                mYangName: "Xun-Zhong Yang", mYangDept: "Management Science (Junior)", mYangJob: "Member Roles & Project Progress Management",
+                mWuName: "Yi-Ru Wu", mWuDept: "Management Science (Junior)", mWuJob: "PESTEL Analysis, Data Consolidation",
+                mLaiName: "Rui-Feng Lai", mLaiDept: "International Business (Junior)", mLaiJob: "Web Integration, Competitor Analysis",
+                btnPresentation: "Presentation Video",
+                aiTitle: "AI Usage Disclosure", aiDesc: "Used Gemini for SPA structure and Tailwind CSS; translation tools for text polishing. All strategic analysis is originally produced by team members based on class theories.",
+                compTitle: "Company Overview", prodTitle: "Core Product Portfolio",
+                prod1: "1. Precision Components", prod1_1: "Ballscrews: Rotary to linear, high precision.", prod1_2: "Linear Guideways: High rigidity platforms.", prod1_3: "Crossed Roller Bearings.",
+                prod2: "2. Robotics & Automation", prod2_1: "Industrial Robots (Articulated, SCARA).", prod2_2: "Harmonic Drives: Robot joint core.", prod2_3: "Single-axis modules & subsystems.",
+                prod3: "3. Emerging Applications", prod3_1: "AI Servers: Thermal modules.", prod3_2: "Semiconductor: EFEM systems.", prod3_3: "Medical: Lower-limb rehab robots.",
+                historyTitle: "4 Stages of History",
+                histPhase1: "Foundation & Int'l", histDesc1: "Acquired Germany's HOLZER in 1993, crossing Japanese tech barriers.",
+                histPhase2: "Expansion & R&D", histDesc2: "Listed in 2009. Invested in MegaFabs to become a mechatronics system provider.",
+                histPhase3: "Smart & Medical", histDesc3: "Developed smart ballscrew (i4.0BS), entered medical & semi supply chains.",
+                histPhase4: "ESG & Future Robots", histDesc4: "Joined DJSI. Developing planetary roller screws for AI humanoid robots.",
+                bmcTitle: "Business Model Canvas", bmcKeyP: "Key Partners", bmcKP1: "Semi/Auto Clients", bmcKP2: "Raw Material Suppliers", bmcKP3: "Academia & Standards",
+                bmcKeyA: "Key Activities", bmcKA1: "Precision R&D", bmcKA2: "Manufacturing & QA", bmcKA3: "Global Marketing",
+                bmcKeyR: "Key Resources", bmcKR1: "R&D & Patents", bmcKR2: "Production Bases", bmcKR3: "HIWIN Brand",
+                bmcValue: "Value Proposition", bmcV1: "Global leading motion control tech.", bmcV2: "High-quality ballscrews & robots.", bmcV3: "Custom solutions for Semi/AI.",
+                bmcCustR: "Customer Relationships", bmcCR1: "Long-term partners", bmcCR2: "Tech Support & After-sales", bmcCR3: "ESG Commitment",
+                bmcChan: "Channels", bmcCH1: "Direct Sales", bmcCH2: "Overseas Subs", bmcCH3: "Distributors & Expos",
+                bmcCustS: "Customer Segments", bmcCS1: "Semi Equip Makers", bmcCS2: "Machine Tools", bmcCS3: "AI Server Apps", bmcCS4: "Medical/Automation",
+                bmcCost: "Cost Structure", bmcCostDesc: "R&D, Manufacturing (Material/Labor), Global Marketing, HR & Admin.",
+                bmcRev: "Revenue Streams", bmcRevDesc: "Sales of precision components, industrial robots, and custom subsystems.",
+                finTitle: "Financial Performance (2021-2025)", finHIWIN: "HIWIN 5-Year Performance", fRev: "Rev(NTD 100M)", fGM: "Gross Margin", fEPS: "EPS",
+                finNote1: "Analysis: '21-22 boom from Semi expansion; '23-25 consolidation due to inflation & inventory.",
+                finVs: "Competitor Comparison (vs. THK)", fMetric: "Metrics (2024)", fRevG: "Revenue Growth", fRDE: "R&D Expense Ratio", fInv: "Inventory Turnover",
+                finNote2: "Insight: HIWIN's vertical integration shows resilience. Margin caught up, decline smaller than THK.",
+                analysisTitle: "External & Competitor Analysis", pestelTitle: "PESTEL Analysis",
+                pP: "Geopolitical conflicts, US-China trade war forcing China+1; tariffs & tech export controls.",
+                pE: "High inflation/rates suppress capex; but AI wave brings massive Semi investments.",
+                pS: "Aging population causes labor shortages; ESG sustainability demands at all-time high.",
+                pT: "Industry 4.0 & Digital Twin adoption; AI deeply embedded in supply chain & products.",
+                pEn: "2050 Net Zero pressure; green procurement by clients; EU CBAM carbon tariffs.",
+                pL: "Global patent wars; stricter carbon & plastic reduction laws; labor rights scrutiny.",
+                compAnalTitle: "Competitors & Strategic Groups", sgCol1: "Company / Position", sgCol2: "Technology", sgCol3: "Advantage (AMC)",
+                sgT1: "Global Tech Leader", sgT2: "Ultra-precision, special apps (magnetic).", sgT3: "Motivated to maintain standard-setter status. Absolute advantage in brand & high-end tech.",
+                sgH1: "Smart Integrator", sgH2: "High-precision, smart (i4.0BS), custom.", sgH3: "Strong cost elasticity, vertical integration (Mikrosystem), challenges high-end market.",
+                sgP1: "Mid-tier Value", sgP2: "Standardized specs.", sgP3: "Price competitiveness, targets standard market without extreme precision needs.",
+                stratTitle: "Value Chain & HR Strategy", vcTitle: "Value Chain Analysis",
+                vcUp: "Upstream: Materials", vcUpDesc: "Relies on special steel & heat tech. PDCA & IQC ensures micron-level potential.",
+                vcMid: "Midstream: Subsystems", vcMidDesc: "Deep integration with Mikrosystem. Local Total Solutions (e.g. Japan cleanrooms) dodge tariffs.",
+                vcDown: "Downstream: Apps", vcDownDesc: "Benefits from AMAT/ASML Semi expansion, AI humanoid robots, and medical rehab.",
+                jobsTitle: "104 Job Bank Insights", jCol1: "Job Category", jCol2: "Role & Compensation", jCol3: "HR Strategic Implication",
+                jDesc1: "High capacity utilization. High pay ensures 24/7 shifts to meet Semi clients' delivery times.",
+                jDesc2: "Injecting CAE & software integration to drive internal smart manufacturing and capture high-end Semi market.",
+                jDesc3: "Using multilingual talent to deepen US/Japan/ASEAN local service and build global patent defenses.",
+                jDesc4: "Addressing 6000+ employee scale with high-paid HR; dedicated gardeners fulfill ESG environmental promises.",
+                quizTitle: "Strategic Quiz", btnRestart: "Play Again",
+                refTitle: "References", refHiwin: "HIWIN Official Website: ", ref104: "104 Job Bank (HIWIN): ", refMOPS: "MOPS (Financials): ",
+                high: "High", mid: "Mid", hrSalary: "Annual Salary 1.5M+",
+                
+                // --- 19 Flip Cards translations ---
+                titleProdF: "📦 Core Products & BMC Flashcards",
+                titleFinF: "📊 Financial & Operations Flashcards",
+                titlePestelF: "🌍 PESTEL & Smart Mfg Terminology Cards",
+                titleChainF: "⛓️ Value Chain & Group Integration Cards",
+                clickToFlip: "(Click card to flip and view strategic analysis)",
+                
+                card1Front: "Ball Screw",
+                card1Header: "Ball Screw (Ball Screw)",
+                card1Back: "<b>[Definition]</b> A highly efficient transmission component that converts rotary motion into linear motion (or vice versa), using precision steel balls as rolling elements between the screw and the nut.<br><br><b>[Layman's Explanation]</b> Think of driving a normal screw—turning the screwdriver (rotation) pushes the screw into the wood (linear motion). While normal screws have high friction, a ball screw is packed with tiny steel 'marbles,' turning sliding friction into rolling friction for micro-level precision and efficiency.",
+                
+                card2Front: "Linear Guideway",
+                card2Header: "Linear Guideway (Linear Guideway)",
+                card2Back: "<b>[Definition]</b> A guiding component used to support and guide moving parts, enabling them to perform linear reciprocating motion along a given path.<br><br><b>[Layman's Explanation]</b> Just like high-speed rail tracks! In automated machines or machine tools, heavy processing heads need to move back and forth. The linear guideway acts as a high-strength track, ensuring frictionless movement while holding up loads of hundreds of kilograms without wobbling.",
+                
+                card3Front: "Harmonic Drive",
+                card3Header: "Harmonic Drive (Harmonic Drive)",
+                card3Back: "<b>[Definition]</b> A high-precision speed reducer consisting of a circular spline, a flexspline, and a wave generator, mainly used in high-torque, high-reduction-ratio, and ultra-low-backlash applications.<br><br><b>[Layman's Explanation]</b> Motors run fast but lack strength. Reducers lower speed to amplify power. 'Harmonic' reducers are compact, lightweight, and have tight gear meshing with zero backlash, preventing robot joints from shaking when they stop.",
+                
+                card4Front: "Value Proposition",
+                card4Header: "Value Proposition (BMC)",
+                card4Back: "<b>[Definition]</b> The core element of the Business Model Canvas representing the unique combination of products, services, or advantages a business promises to create value and solve pain points for customers.<br><br><b>[Layman's Explanation]</b> It answers one simple question for clients: 'Why should I buy from you instead of your competitors?' For HIWIN, it is not 'I am cheap,' but rather 'I provide global-leading high-precision control tech and custom solutions to boost your capacity.'",
+                
+                card5Front: "Customer Segments",
+                card5Header: "Customer Segments (BMC)",
+                card5Back: "<b>[Definition]</b> The specific target groups, communities, or organizations a business intends to serve and create value for.<br><br><b>[Layman's Explanation]</b> It defines 'who' the business focuses its resources on. Since HIWIN is a B2B business, its customer segment targets semiconductor equipment builders, machine tool builders, and AI server manufacturers instead of general consumers.",
+                
+                card6Front: "Smart Component i4.0GW",
+                card6Header: "Smart Component i4.0GW",
+                card6Back: "<b>[Smart Component i4.0GW]</b> Short for 'Smart Linear Guideway.' In smart components, i4.0GW integrates advanced sensing tech to monitor lubrication, thermal changes, and vibration in real time, enabling predictive maintenance and self-diagnostic features for Industry 4.0 machinery.",
+                
+                card7Front: "Tech Complementarity",
+                card7Header: "Tech Complementarity",
+                card7Back: "<b>[Tech Complementarity]</b> Technical synergy between HIWIN and its group affiliate, 'HIWIN MIKROSYSTEM.' HIWIN specializes in precision mechanical transmission (guideways, screws) while MIKROSYSTEM excels in precision motion control and motors. Together they export a unified mechatronics Total Solution.",
+                
+                card8Front: "2009 Israel Investment",
+                card8Header: "2009 Israel Investment",
+                card8Back: "<b>[2009 Israel Investment]</b> Strategic investment in Israel's motion controller giant, MegaFabs Motion Systems LTD. This critical move enabled HIWIN to fully acquire and absorb the vital 'brain' controller technology essential for executing advanced mechatronics solutions.",
+                
+                card9Front: "Major Product",
+                card9Header: "Major Product (Guideway)",
+                card9Back: "<b>[Largest Revenue Product]</b> Linear Guideways currently represent HIWIN's largest revenue contributor and highest market penetration product, heavily relied upon globally for tool machine loading and semiconductor high-precision alignment.",
+                
+                card10Front: "De-stocking",
+                card10Header: "De-stocking (De-stocking)",
+                card10Back: "<b>[Definition]</b> The process of reducing stock to cut back on locked capital and depreciation through reducing orders and clearing warehouse backlogs.<br><br><b>[Context]</b> During the 2023-2025 macro downturn triggered by inflation and rate hikes, the tool-machine industry went through a massive destocking cycle. HIWIN responded with a faster stock turnover rate than its competitor THK.",
+                
+                card11Front: "External Shock",
+                card11Header: "External Shock (Shock)",
+                card11Back: "<b>[Definition]</b> Significant business disruption arising from macro external forces beyond internal controls, such as geopolitics, war, pandemics, and macroeconomic policies.<br><br><b>[Context]</b> HIWIN's linear guideway sales experienced fluctuation in 2019 due to US-China trade friction—a typical mature stage external shock, not product obsolescence.",
+                
+                card12Front: "Base Effect",
+                card12Header: "Base Effect (Base Effect)",
+                card12Back: "<b>[Definition]</b> Financial 'base effect' where low previous benchmarks make minor business recoveries look like remarkable YoY percentage jumps.<br><br><b>[Context]</b> THK's 2025 revenue bounce of +7.95% is a classic base effect reaction following a severe contraction in 2024 (-36.71%), rather than a sign of a market boom.",
+                
+                card13Front: "Challenger Posture",
+                card13Header: "Challenger Posture",
+                card13Back: "<b>[Definition]</b> Aggressive tactics (aggressive pricing, R&D boost, overseas expansions) deployed by a non-leader firm to seize market share from the dominant industry leader.<br><br><b>[Context]</b> Challenging leader THK, HIWIN maintained a high R&D expense ratio of 4.22% in 2025 despite industry headwinds, asserting an aggressive challenger posture.",
+                
+                card14Front: "Mechatronics Solutions",
+                card14Header: "Mechatronics Solutions",
+                card14Back: "<b>[Definition]</b> Comprehensive, integrated systems fusing traditional mechanical elements (like screw shafts and guideways) with electronics, drive controls, and operating software.<br><br><b>[Context]</b> This marks HIWIN's fundamental strategic pivot from component sales to systems integration, enabling seamless penetration into EV and medical rehabilitation robots.",
+                
+                card15Front: "Decentralization",
+                card15Header: "Decentralization",
+                card15Back: "<b>[Definition]</b> Decentralization in supply chain management means spreading factories, resources, and decisions away from a single manufacturing hub. This mitigates total halt risks during natural disasters, local lockdowns, or political shifts.",
+                
+                card16Front: "China+1 Strategy",
+                card16Header: "China+1 Strategy",
+                card16Back: "<b>[Definition]</b> China+1 Strategy is a multinational supply chain model adding factory nodes (e.g., Vietnam, Thailand, India) in addition to Chinese factories. This keeps China localized while securing secondary routes to bypass tariffs.",
+                
+                card17Front: "AGV Vehicles",
+                card17Header: "AGV Vehicles",
+                card17Back: "<b>[Definition]</b> Automated Guided Vehicles (AGV). Driverless cargo carts navigating via magnetic tapes, lasers, or visual path sensors. Essential for overcoming manual labor deficits and automating high-throughput factory logistics.",
+                
+                card18Front: "Digital Twin",
+                card18Header: "Digital Twin",
+                card18Back: "<b>[Definition]</b> Fusing real-time IoT feeds to construct a perfect virtual 3D replica of industrial equipment. Engineers run simulation stress tests in virtual space, predicting hardware failures and optimizing machinery setup.",
+                
+                card19Front: "Smart Manufacturing",
+                card19Header: "Smart Manufacturing",
+                card19Back: "<b>[Definition]</b> Smart Manufacturing (Industry 4.0). Merging IoT, big data, AI, and smart robotic arms so factory nodes interact. When assembly errors or order shifts happen, systems auto-tune the lines, achieving high-speed flexible customization."
+            }
         };
 
-        // --- 文字轉語音 (TTS) 導覽 ---
-        const btnAudio = document.getElementById('btn-audio');
-        let isPlaying = false;
-        function speakText(text) {
-            if (isPlaying) { window.speechSynthesis.cancel(); isPlaying = false; btnAudio.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>'; return; }
-            
-            // 如果錄音正在播放，先關掉
-            if (!audioFile.paused) { audioFile.pause(); playIcon.className = 'fa-solid fa-play ml-1'; btnPlayAudio.classList.add('animate-pulse-custom'); }
+        let currentLang = 'zh';
 
-            const utterance = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-            if (currentLang === 'en') utterance.voice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Male'));
-            else utterance.voice = voices.find(v => v.lang === 'zh-TW');
-            utterance.onend = () => { isPlaying = false; btnAudio.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>'; };
-            window.speechSynthesis.speak(utterance);
-            isPlaying = true; btnAudio.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            document.getElementById('langText').innerText = currentLang === 'zh' ? 'EN' : '中文';
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-TW' : 'en';
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) el.innerHTML = translations[currentLang][key];
+            });
+            
+            loadQuestion(); // reload quiz language
         }
-        btnAudio.addEventListener('click', () => speakText(document.querySelector('#company p').innerText));
+
+        // --- 3. Dark Mode System ---
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('themeIcon');
+            icon.className = document.documentElement.classList.contains('dark') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+
+        // --- 4. Voice Navigation System ---
+        let voices = [];
+        window.speechSynthesis.onvoiceschanged = () => voices = window.speechSynthesis.getVoices();
+
+        function getTargetVoice(lang) {
+            if (voices.length === 0) voices = window.speechSynthesis.getVoices();
+            if (lang === 'en') {
+                return voices.find(v => v.lang.includes('en-GB') && v.name.toLowerCase().includes('male')) || voices.find(v => v.lang.includes('en'));
+            } else {
+                return voices.find(v => v.lang.includes('zh-TW') && v.name.includes('Yating')) || voices.find(v => v.lang.includes('zh'));
+            }
+        }
+
+        let isSpeaking = false;
+        function speakCurrentPage() {
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                document.getElementById('speakBtn').classList.remove('bg-blue-100', 'dark:bg-blue-900/60');
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            
+            // Find active page
+            const activePage = document.querySelector('.page-view.active').id;
+            let textToSpeak = "";
+            const t = translations[currentLang];
+            
+            switch(activePage) {
+                case 'page-home': textToSpeak = `${t.heroTitle}. ${t.heroSubtitle}`; break;
+                case 'page-company': textToSpeak = `${t.compTitle}. ${t.prodTitle}: ${t.prod1}, ${t.prod2}, ${t.prod3}.`; break;
+                case 'page-analysis': textToSpeak = `${t.analysisTitle}. ${t.pestelTitle}. P: ${t.pP}. T: ${t.pT}.`; break;
+                case 'page-strategy': textToSpeak = `${t.stratTitle}. ${t.vcTitle}: ${t.vcUp}, ${t.vcMid}, ${t.vcDown}.`; break;
+                case 'page-quiz': textToSpeak = t.quizTitle; break;
+            }
+
+            if (!textToSpeak) return;
+
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            const voice = getTargetVoice(currentLang);
+            if (voice) utterance.voice = voice;
+            utterance.rate = currentLang === 'zh' ? 1.0 : 0.9;
+            
+            utterance.onstart = () => {
+                isSpeaking = true;
+                document.getElementById('speakBtn').classList.add('bg-blue-100', 'dark:bg-blue-900/60');
+            };
+            utterance.onend = () => {
+                isSpeaking = false;
+                document.getElementById('speakBtn').classList.remove('bg-blue-100', 'dark:bg-blue-900/60');
+            };
+            utterance.onerror = () => {
+                isSpeaking = false;
+                document.getElementById('speakBtn').classList.remove('bg-blue-100', 'dark:bg-blue-900/60');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- 5. Interactive Quiz System (15 Questions completely aligned with PDF) ---
+        const quizData = {
+            zh: [
+                { q: "1. 上銀科技近年積極將其精密傳動元件與技術延伸至新興領域。針對當前熱門的「AI伺服器」相關應用，上銀主要切入的角度是什麼？", opts: ["(A) 直接設計與生產AI伺服器內部的CPU 晶片", "(B) 提供AI伺服器散熱模組、接頭連接器等製造設備所需的傳動系統元件", "(C) 開發專門供AI運算使用的雲端資料中心管理軟體"], ans: 1 },
+                { q: "2. 在上銀科技的商業模式畫布中，他們的「客戶區隔」涵蓋了半導體、工具機、醫療設備等多元製造商。為了滿足這群不同產業客戶的核心需求，上銀在「價值主張」上提出了什麼關鍵優勢？", opts: ["(A) 主打消費性電子產品的低成本、大量快速複製模式", "(B) 僅提供標準化規格產品，不接受任何調整", "(C) 憑藉高精度運動控制技術，提供提升生產效率的客製化解決方案"], ans: 2 },
+                { q: "3. 上銀科技能維持全球品牌「HIWIN」的聲譽，並持續推出滾珠螺桿、線性滑軌與工業機器人等高剛性產品，背後最仰賴的「關鍵活動」與「關鍵資源」組合是什麼？", opts: ["(A) 傳動與機器人技術的研發、精密製造控制，以及訓練有素的技術人才", "(B) 大規模的消費型社群媒體廣告投放，以及零售通路門市的經營", "(C) 鋼鐵等原物料的開採、冶煉，以及全球貨運物流車隊的直接管理"], ans: 0 },
+                { q: "4. 針對工業4.0浪潮，上銀研發的智慧型滾珠螺桿(i4.0BS)能為客戶解決什麼樣的傳統維護痛點？", opts: ["(A) 完全取代作業員的手動校準程序", "(B) 將「定期保養」轉化為「預知保養」預測故障避免無預警停機", "(C) 降低原料端特殊鋼材的使用成本"], ans: 1 },
+                { q: "5. 上銀科技在1993年併購德國HOLZER公司，其最主要的戰略目的為何？", opts: ["(A) 擴大低階傳動元件的全球產能", "(B) 為了取得進入中國市場的通行證", "(C) 直接跨越日系大廠所設下的技術壁壘"], ans: 2 },
+                { q: "6. 上銀與集團企業「大銀微系統」的戰略同盟，主要如何發揮「集團綜效」來應對全球地緣政治帶來的關稅衝擊？", opts: ["(A) 全面撤回海外投資以回防台灣基地", "(B) 聯合併購海外原物料礦產公司", "(C) 透過「機械傳動+運動控制」提供全方位解決方案(Total Solution)提高整合價值"], ans: 2 },
+                { q: "7. 上銀科技在2023年至2025年間營收與獲利出現下滑，主要是受到以下哪一個外部環境因素的「下行期阻力」影響？", opts: ["(A) 全球通膨與升息壓力，加上中國大陸工具機產業進入漫長的「去庫存」週期", "(B) 美德兩國大幅課徵關稅，導致上銀的海外市場被法律全面封鎖", "(C) 「工業4.0」熱潮完全退去，全球市場不再需要自動化零組件"], ans: 0 },
+                { q: "8. 關於上銀主力產品「線性滑軌」的近十年銷售發展，下列哪一項敘述符合目前的「成熟穩定期(2023-2024)」特徵？", opts: ["(A) 產品供不應求，銷售額比早期瘋狂翻倍成長", "(B) 呈現典型的去庫存與市場飽和，銷售額雖比高峰下滑，但比起2015年仍成長了約78%", "(C) 因為產品過時被市場淘汰，銷售額已經跌破2015年的基準線"], ans: 1 },
+                { q: "9. 在與日本龍頭廠THK的近三年財務對比中，上銀科技在應對產業衰退時展現了哪項「庫存管理」上的優勢？", opts: ["(A) 上銀的研發費用率比THK低，省下了大量現金", "(B) 上銀在2024年後的「存貨週轉率」高於THK，顯示其庫存調整速度更靈活、資金效率更高", "(C) 上銀完全不開發生產新產品，因此沒有任何庫存壓力"], ans: 1 },
+                { q: "10. 迎戰「AI與智慧製造」趨勢，上銀在技術研發上的首要升級方向為何？", opts: ["(A) 結合物聯網與數位雙生，推動精密元件智慧化（硬體加上聰明大腦）", "(B) 全面轉型為純軟體演算法與雲端數據開發商", "(C) 提高傳統機械五金的規模化量產比例"], ans: 0 },
+                { q: "11. 為了符合國際大廠的「低碳供應鏈」規範及「CBAM碳關稅」門檻，上銀必須具備什麼能力？", opts: ["(A) 購買大量的境外碳權來完全抵銷生產排放", "(B) 建立碳盤查機制並推行全製程綠色低碳轉型以治本", "(C) 將高耗能製程外包給沒有碳稅法規的地區"], ans: 1 },
+                { q: "12. 隨著全球技術競爭與「減碳法規」日漸嚴格，上銀在法務佈局上最需關注何者？", opts: ["(A) 全面公開核心技術原始碼以換取國際免稅認證", "(B) 成立專屬遊說團隊以阻擋各國綠色法規通過", "(C) 強化跨國專利防護網與綠色法規的合規審查"], ans: 2 },
+                { q: "13. 如果上銀科技想要從中階市場往高階市場升級，最需要優先強化哪一項能力？", opts: ["(A) 降低產品價格，與銀泰PMI進行更激烈的價格競爭", "(B) 強化超精密技術、特殊應用研發與高可靠性產品能力", "(C) 減少客製化服務，改以標準化產品大量生產為主"], ans: 1 },
+                { q: "14. 從AMC 分析來看，為什麼THK與上銀之間的競爭強度可能會持續升高？", opts: ["(A) 因為兩家公司市場重疊度高，且都受到AI、自動化、半導體與智慧製造需求成長的推動", "(B) 因為兩家公司都主要鎖定低價標準品市場，所以價格戰會成為唯一競爭方式", "(C) 因為THK 已完全退出高階市場，使上銀能快速取代其市場地位"], ans: 0 },
+                { q: "15. 根據策略群組分析，哪一項最能說明上銀科技在 THK 與銀泰PMI之間的策略定位？", opts: ["(A) 上銀完全偏向低價標準品市場，主要以價格取勝", "(B) 上銀雖不如 THK 具備全球技術領導地位，但透過高精密、智慧化、客製化與成本控制形成差異化優勢", "(C) 上銀與銀泰PMI的定位完全相同，因此兩者沒有明顯策略差異"], ans: 1 }
+            ],
+            en: [
+                { q: "1. HIWIN has actively extended its precision components and technology into emerging fields. What is HIWIN's main approach to the current hot 'AI Server' applications?", opts: ["(A) Directly design and produce CPU chips inside AI servers", "(B) Provide transmission components needed for manufacturing equipment of AI server cooling modules and connectors", "(C) Develop cloud data center management software dedicated to AI computing"], ans: 1 },
+                { q: "2. In HIWIN's Business Model Canvas, their 'Customer Segments' cover various manufacturers such as semiconductor, machine tool, and medical equipment. To meet their core needs, what key advantage does HIWIN propose in its 'Value Proposition'?", opts: ["(A) Focusing on low-cost, high-volume replication for consumer electronics", "(B) Providing only standardized products without any adjustments", "(C) Leveraging high-precision motion control technology to offer customized solutions that improve production efficiency"], ans: 2 },
+                { q: "3. What combination of 'Key Activities' and 'Key Resources' does HIWIN rely on most to maintain its global brand reputation and continuously launch high-rigidity products like ballscrews, linear guideways, and industrial robots?", opts: ["(A) R&D of transmission & robotics, precision manufacturing control, and highly trained technical talents", "(B) Large-scale social media advertising and retail store operations", "(C) Mining and smelting of raw materials like steel, and direct management of global logistics fleets"], ans: 0 },
+                { q: "4. To address the Industry 4.0 wave, what traditional maintenance pain point does HIWIN's smart ballscrew (i4.0BS) solve for customers?", opts: ["(A) Completely replacing the manual calibration procedures of operators", "(B) Transforming 'scheduled maintenance' into 'predictive maintenance' to predict faults and avoid unplanned downtime", "(C) Reducing the cost of using special steel at the raw material end"], ans: 1 },
+                { q: "5. What was the primary strategic objective of HIWIN's acquisition of Germany's HOLZER in 1993?", opts: ["(A) Expanding global capacity for low-end motion components", "(B) Obtaining an entry pass into the Chinese market", "(C) Directly bypassing the technical barriers set by major Japanese competitors"], ans: 2 },
+                { q: "6. How does the strategic alliance between HIWIN and its group affiliate 'HIWIN MIKROSYSTEM' leverage 'group synergy' to counter geopolitical tariff shocks?", opts: ["(A) Completely withdrawing overseas investments to retreat back to the Taiwan base", "(B) Jointly acquiring overseas raw material mining companies", "(C) Providing 'Mechanical Transmission + Motion Control' to offer a Total Solution and improve integration value"], ans: 2 },
+                { q: "7. The decline in HIWIN's revenue and profits between 2023 and 2025 was mainly due to which external environment 'downturn resistance'?", opts: ["(A) Global inflation and interest rate hikes, combined with a prolonged destocking cycle in mainland China's machine tool industry", "(B) Heavy tariffs imposed by the US and Germany, completely blocking HIWIN's overseas markets by law", "(C) The complete fade of the 'Industry 4.0' boom, making automation components obsolete globally"], ans: 0 },
+                { q: "8. Regarding the decade-long sales development of HIWIN's core product 'Linear Guideways', which description fits the current 'Mature & Stable Stage (2023-2024)'?", opts: ["(A) Products in short supply, with sales growth doubling frantically compared to early stages", "(B) Showing typical destocking and market saturation; though sales dropped from peak, they still grew by about 78% compared to 2015", "(C) Outdated and eliminated by the market, with sales falling below the 2015 baseline"], ans: 1 },
+                { q: "9. In the three-year financial comparison with Japanese leader THK, what 'inventory management' advantage did HIWIN demonstrate during the industrial recession?", opts: ["(A) HIWIN's R&D expense ratio was lower than THK's, saving a large amount of cash", "(B) HIWIN's inventory turnover rate was higher than THK's after 2024, showing more flexible inventory adjustment and higher capital efficiency", "(C) HIWIN stopped developing and manufacturing new products altogether, hence zero inventory pressure"], ans: 1 },
+                { q: "10. Facing the 'AI & Smart Manufacturing' trend, what is HIWIN's primary direction for technological R&D upgrade?", opts: ["(A) Combining IoT and Digital Twins to drive the intelligence of precision components", "(B) Transitioning completely into a pure software algorithm and cloud data developer", "(C) Increasing the mass production scale of traditional mechanical hardware"], ans: 0 },
+                { q: "11. To comply with multinational corporations' 'low-carbon supply chain' specs and 'CBAM carbon tariff' barriers, what capability must HIWIN possess?", opts: ["(A) Purchasing a large amount of offshore carbon credits to fully offset production emissions", "(B) Establishing carbon auditing systems and driving green and low-carbon transformation throughout the manufacturing process", "(C) Outsourcing energy-intensive manufacturing processes to regions without carbon tax laws"], ans: 1 },
+                { q: "12. With intensifying global technological competition and stricter environmental regulations, what should HIWIN prioritize in its legal strategic layout?", opts: ["(A) Fully disclosing core technology source codes to exchange for international tax-exempt certifications", "(B) Forming dedicated lobbying teams to block green regulations in various countries", "(C) Strengthening global patent protection networks and compliance audits for green regulations"], ans: 2 },
+                { q: "13. If HIWIN wants to upgrade from the mid-end to the high-end market, which capability must be prioritized?", opts: ["(A) Lowering product prices to engage in more intense price competition with PMI", "(B) Strengthening ultra-precision tech, R&D for special applications, and high-reliability product capabilities", "(C) Reducing customized services and shifting back to high-volume standardized production"], ans: 1 },
+                { q: "14. From the AMC analysis perspective, why is the competition intensity between THK and HIWIN expected to continue rising?", opts: ["(A) Because both companies have high market overlap and are driven by growing demands in AI, automation, semiconductors, and smart manufacturing", "(B) Because both companies target low-price standard products, making price wars the only way to compete", "(C) Because THK has completely withdrawn from the high-end market, allowing HIWIN to rapidly replace its position"], ans: 0 },
+                { q: "15. According to strategic group analysis, which statement best describes HIWIN's strategic positioning between THK and PMI?", opts: ["(A) HIWIN leans entirely toward the low-cost standardized market, winning primarily on price", "(B) While HIWIN does not have THK's global tech leadership, it achieves differentiation through high precision, intelligence, customization, and cost control", "(C) HIWIN and PMI share identical positioning, offering no significant strategic differences"], ans: 1 }
+            ]
+        };
+
+        let currentQuestion = 0; 
+        let score = 0;
+
+        function loadQuestion() {
+            const data = quizData[currentLang];
+            if (currentQuestion >= data.length) { showQuizResult(); return; }
+
+            const q = data[currentQuestion];
+            document.getElementById('quiz-progress').innerText = `Question ${currentQuestion + 1} / ${data.length}`;
+            document.getElementById('quiz-score').innerText = `Score: ${score}`;
+            document.getElementById('question-text').innerText = q.q;
+
+            // Update Progress bar width
+            const percent = ((currentQuestion) / data.length) * 100;
+            document.getElementById('quiz-progressbar').style.width = `${percent}%`;
+            
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+            
+            q.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-2xl border border-gray-200 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition bg-white dark:bg-darkCard shadow-sm font-semibold flex items-center gap-3";
+                
+                // Add option letters A, B, C...
+                const label = String.fromCharCode(65 + index); // 65 is 'A'
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-500">${label}</span>
+                    <span class="flex-grow">${opt}</span>
+                `;
+                btn.onclick = () => checkAnswer(index, q.ans, btn);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, correct, btn) {
+            const optsContainer = document.getElementById('options-container');
+            // Disable all buttons immediately to avoid multiple clicks
+            Array.from(optsContainer.children).forEach(child => { 
+                child.onclick = null; 
+                child.classList.remove('hover:bg-blue-50', 'hover:border-blue-300'); 
+            });
+
+            const correctSpan = btn.querySelector('span');
+
+            if (selected === correct) {
+                btn.classList.add('bg-green-50', 'dark:bg-green-950/30', 'border-green-500', 'text-green-800', 'dark:text-green-200');
+                if (correctSpan) {
+                    correctSpan.classList.add('bg-green-500', 'text-white');
+                    correctSpan.innerHTML = '<i class="fa-solid fa-check"></i>';
+                }
+                score += 100;
+            } else {
+                btn.classList.add('bg-red-50', 'dark:bg-red-950/30', 'border-red-500', 'text-red-800', 'dark:text-red-200');
+                if (correctSpan) {
+                    correctSpan.classList.add('bg-red-500', 'text-white');
+                    correctSpan.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                }
+                
+                // Highlight the correct one
+                const correctBtn = optsContainer.children[correct];
+                correctBtn.classList.add('bg-green-50', 'dark:bg-green-950/30', 'border-green-500');
+                const correctLabelSpan = correctBtn.querySelector('span');
+                if (correctLabelSpan) {
+                    correctLabelSpan.classList.add('bg-green-500', 'text-white');
+                    correctLabelSpan.innerHTML = '<i class="fa-solid fa-check"></i>';
+                }
+            }
+            document.getElementById('quiz-score').innerText = `Score: ${score}`;
+
+            setTimeout(() => { currentQuestion++; loadQuestion(); }, 2000);
+        }
+
+        function showQuizResult() {
+            document.getElementById('question-text').style.display = 'none';
+            document.getElementById('options-container').style.display = 'none';
+            document.getElementById('quiz-progress').style.display = 'none';
+            document.getElementById('quiz-progressbar').parentElement.style.display = 'none';
+            
+            const res = document.getElementById('quiz-result');
+            res.style.display = 'block';
+            
+            const t = translations[currentLang];
+            document.getElementById('result-title').innerText = currentLang === 'zh' ? "測驗完成！" : "Quiz Completed!";
+            document.getElementById('result-desc').innerText = currentLang === 'zh' ? `您的最終得分：${score} / ${currentQuestion * 100}` : `Final Score: ${score} / ${currentQuestion * 100}`;
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0; score = 0;
+            document.getElementById('question-text').style.display = 'block';
+            document.getElementById('options-container').style.display = 'block';
+            document.getElementById('quiz-progress').style.display = 'inline';
+            document.getElementById('quiz-progressbar').parentElement.style.display = 'block';
+            document.getElementById('quiz-result').style.display = 'none';
+            loadQuestion();
+        }
+
+        // Initialize translations and trigger correct display on first load
+        window.onload = () => {
+            switchPage('home'); // explicitly trigger home view logic
+            
+            // Populate initial Chinese translations correctly
+            currentLang = 'zh';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) el.innerHTML = translations[currentLang][key];
+            });
+
+            // Set content for the flip cards
+            document.getElementById('card1Back').innerHTML = translations[currentLang]['card1Back'];
+            document.getElementById('card10Back').innerHTML = translations[currentLang]['card10Back'];
+
+            loadQuestion();
+        };
     </script>
 </body>
 </html>
